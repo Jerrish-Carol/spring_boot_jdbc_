@@ -62,8 +62,15 @@ public class EmployeeController {
 	
 	@DeleteMapping("/employees/{id}")
 	public String deleteEmployeeById(@PathVariable int id) {
+		if (eDAO.getById(id).getName() != null) {
 		
 			return "No of rows removed from the database : " + eDAO.delete(id) ;
+		}
+		else {
+			List<String> exception = new ArrayList<>();
+			exception.add("Not data present to delete");
+			throw new DetailsNotFoundException(0, "NOT_DELETED", exception);
+		}
 		
 	}
 
