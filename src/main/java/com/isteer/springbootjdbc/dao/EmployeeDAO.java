@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.isteer.springbootjdbc.model.Employee;
 import com.isteer.springbootjdbc.response.CustomDeleteResponse;
+import com.isteer.springbootjdbc.response.CustomGetResponse;
 import com.isteer.springbootjdbc.response.CustomPostResponse;
 
 public interface EmployeeDAO {
@@ -16,5 +17,5 @@ public interface EmployeeDAO {
 	
 	List<Employee> getAll();
 	
-	Employee getById(long id);
+	CustomGetResponse getById(long id);
 }

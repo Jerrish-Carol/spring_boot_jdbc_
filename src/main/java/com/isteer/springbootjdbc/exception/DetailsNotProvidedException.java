@@ -2,6 +2,9 @@ package com.isteer.springbootjdbc.exception;
 
 import java.util.List;
 
+import lombok.Data;
+
+@Data
 public class DetailsNotProvidedException extends RuntimeException {
 
 	private long Status;
