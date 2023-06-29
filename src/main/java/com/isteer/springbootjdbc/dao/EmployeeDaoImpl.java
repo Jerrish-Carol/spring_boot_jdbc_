@@ -1,7 +1,8 @@
 package com.isteer.springbootjdbc.dao;
 
-
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,6 @@ public class EmployeeDaoImpl implements EmployeeDAO {
 		
 		GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
-
 		if(jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(SqlQueries.INSERT_EMPLOYEE_QUERY, new String[]{"id"});
             ps.setString(1, employee.getName() );
@@ -40,9 +40,7 @@ public class EmployeeDaoImpl implements EmployeeDAO {
             return ps;
         }, keyHolder)==1) {
 			employee.setId(keyHolder.getKey().longValue());
-			/*
-			 * 
-			 * */
+			
 			return new CustomPostResponse(1, "SAVED", employee);
 			
 		}
@@ -53,6 +51,8 @@ public class EmployeeDaoImpl implements EmployeeDAO {
 		}
 		
 	}
+	
+	
 
 	@Override
 	public CustomPostResponse update(Employee employee, long id) {
@@ -82,15 +82,46 @@ public class EmployeeDaoImpl implements EmployeeDAO {
 
 	@Override
 	public List<Employee> getAll() {
-		return jdbcTemplate.query(SqlQueries.GET_EMPLOYEES_QUERY, new BeanPropertyRowMapper<Employee>(Employee.class));
+		return jdbcTemplate.query(SqlQueries.GET_EMPLOYEES_QUERY, new BeanPropertyRowMapper<Employee>() {
+				
+				public Employee mapRow(ResultSet rs, int rowNum) throws SQLException {
+					Employee employee = new Employee();
+					employee.setId(rs.getLong("id"));
+					employee.setName(rs.getString("name"));
+					employee.setEmail(rs.getString("email"));
+					employee.setDob(rs.getString("dob"));
+					employee.setGender(rs.getString("gender"));
+					employee.setDepartment(rs.getString("department"));
+					employee.setIsAccountLocked(rs.getBoolean("is_account_locked"));
+					employee.setIsActive(rs.getBoolean("is_active"));
+				
+				return employee;
+				}	
+		});
 	}
 
 	@Override
 	public CustomGetResponse getById(long id) {
 
-		return new CustomGetResponse(jdbcTemplate.queryForObject(SqlQueries.GET_EMPLOYEES_BY_ID_QUERY,
-				new BeanPropertyRowMapper<Employee>(Employee.class), id));
+		return new CustomGetResponse(jdbcTemplate.queryForObject(SqlQueries.GET_EMPLOYEES_BY_ID_QUERY, new BeanPropertyRowMapper<Employee>() {
+				
+				public Employee mapRow(ResultSet rs, int rowNum) throws SQLException {
+					Employee employee = new Employee();
+					employee.setId(rs.getLong("id"));
+					employee.setName(rs.getString("name"));
+					employee.setEmail(rs.getString("email"));
+					employee.setDob(rs.getString("dob"));
+					employee.setGender(rs.getString("gender"));
+					employee.setDepartment(rs.getString("department"));
+					employee.setIsAccountLocked(rs.getBoolean("is_account_locked"));
+					employee.setIsActive(rs.getBoolean("is_active"));
+				
+				return employee;
+				}
 
+		},id));
+		
 	}
+		
 
 }
