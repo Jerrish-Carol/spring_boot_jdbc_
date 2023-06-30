@@ -5,6 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,17 +20,21 @@ import com.isteer.springbootjdbc.response.CustomGetResponse;
 import com.isteer.springbootjdbc.response.CustomPostResponse;
 import com.isteer.springbootjdbc.sqlquery.SqlQueries;
 
-@Repository // 
+@Repository 
 public class EmployeeDaoImpl implements EmployeeDAO {
-
+	
 	
 	@Autowired
 	private JdbcTemplate jdbcTemplate; //spring will create this and put in Ioc Container
+	
+	/*ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+	Validator validator = factory.getValidator();*/
 	
 	@Override
 	public CustomPostResponse save(Employee employee) { 
 		
 		GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+		
 
 		if(jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(SqlQueries.INSERT_EMPLOYEE_QUERY, new String[]{"id"});
@@ -41,8 +48,18 @@ public class EmployeeDaoImpl implements EmployeeDAO {
         }, keyHolder)==1) {
 			employee.setId(keyHolder.getKey().longValue());
 			
+			/*Set<ConstraintViolation<Employee>> violations = validator.validate(employee);
+			if (!violations.isEmpty()) {
+				System.out.println(violations);
+			    for (ConstraintViolation<Employee> violation : violations) {
+			        System.out.println(violation.getPropertyPath() + ": " + violation.getMessage());
+			    }
+			    return null;
+			} else {
+				return new CustomPostResponse(1, "SAVED", employee);
+			}*/
+		
 			return new CustomPostResponse(1, "SAVED", employee);
-			
 		}
 		else {
 			List<String> exception = new ArrayList<>();
@@ -52,24 +69,21 @@ public class EmployeeDaoImpl implements EmployeeDAO {
 		
 	}
 	
-	
 
 	@Override
 	public CustomPostResponse update(Employee employee, long id) {
-		
 
-		if(employee.getName()!="" && employee.getEmail()!="" && employee.getDepartment()!="") {
-			if(jdbcTemplate.update(SqlQueries.UPDATE_EMPLOYEES_BY_ID_QUERY, new Object[] {employee.getName(),employee.getDob() ,employee.getGender() ,employee.getEmail(), employee.getDepartment(),id})==1) {
-				employee.setId(id);
-				return new CustomPostResponse(1, "UPDATED", employee);
-			}
+		if (jdbcTemplate.update(SqlQueries.UPDATE_EMPLOYEES_BY_ID_QUERY, new Object[] { employee.getName(),
+			employee.getDob(), employee.getGender(), employee.getEmail(), employee.getDepartment(), id }) == 1) {
+			employee.setId(id);
+			return new CustomPostResponse(1, "UPDATED", employee);
 		}
+
 		else {
 			List<String> exception = new ArrayList<>();
 			exception.add("Provide all details required");
 			throw new DetailsNotProvidedException(0, "NOT_SAVED", exception);
 		}
-		return null;
 	}
 
 	@Override

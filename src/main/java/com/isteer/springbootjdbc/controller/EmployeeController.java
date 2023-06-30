@@ -2,6 +2,7 @@ package com.isteer.springbootjdbc.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,16 +21,17 @@ import com.isteer.springbootjdbc.response.CustomDeleteResponse;
 import com.isteer.springbootjdbc.response.CustomGetResponse;
 import com.isteer.springbootjdbc.response.CustomPostResponse;
 import com.isteer.springbootjdbc.sqlquery.SqlQueries;
-
-import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @RestController
 public class EmployeeController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class.getName());
 
 	@Autowired
 	private EmployeeDAO eDAO;
-	
 	
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -45,23 +47,41 @@ public class EmployeeController {
 		if (jdbcTemplate.queryForObject(SqlQueries.CHECK_ID_IS_PRESENT_QUERY, Long.class, id) == 0) {
 			List<String> exception = new ArrayList<>();
 			exception.add("The details are not present for id "+id);
+			logger.error("ID is not present.");
+			
 			throw new DetailsNotFoundException(0, "NOT_FOUND", exception);
 		} else {
+			logger.info("ID is preesnt and data is retrieved");
 			return new ResponseEntity<CustomGetResponse>(eDAO.getById(id), HttpStatus.OK);
 		}
 	}
 
 	@PostMapping("/employees")
-	public ResponseEntity<CustomPostResponse> saveEmployee(@Valid @RequestBody Employee employee) {
+	public ResponseEntity<CustomPostResponse> saveEmployee(@RequestBody Employee employee) {
+		
+		List<String> exceptions = new ArrayList<>();
 
-		if (employee.getName()!="" && employee.getEmail()!="" && employee.getDepartment()!="" && employee.getGender()!="" && employee.getDob()!="") {
-			return new ResponseEntity<CustomPostResponse>(eDAO.save(employee), HttpStatus.CREATED) ;
-		}
-		else {
-			List<String> exception = new ArrayList<>();
-			exception.add("Provide all details required");
-			throw new DetailsNotFoundException(0, "NOT_SAVED", exception);
-		}
+			if(employee.getName()=="" || employee.getEmail()=="" || employee.getDepartment()=="" || employee.getGender()=="" || employee.getDob()=="") {
+				exceptions.add("no field should be empty");
+			}
+			if(employee.getName().length()<5) {
+				exceptions.add("name must have atleast 5 characters");
+			}
+			if(!employee.getEmail().matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")){
+				exceptions.add("email id is not right format");
+			}
+			if(!employee.getGender().matches("Male|Female|Other")) {
+				exceptions.add("Gender must be specified as Male|Female|Other");
+			}
+			if(!employee.getDob().matches("^(1[0-2]|0[1-9])/(3[01]|[12][0-9]|0[1-9])/[0-9]{4}$")) {
+				exceptions.add("Date must be specified as dd-mm-yyyy");
+			}
+			if (exceptions.isEmpty()) {
+				return new ResponseEntity<CustomPostResponse>(eDAO.save(employee), HttpStatus.CREATED) ;
+			}
+			else {
+				throw new ConstraintException(0,"NOT VALID" , exceptions);
+			}
 			 
 	}
 	

@@ -1,17 +1,15 @@
 package com.isteer.springbootjdbc.model;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import org.springframework.beans.factory.annotation.Value;
 import com.fasterxml.jackson.annotation.JsonFormat;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -19,22 +17,22 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity  
 @Getter
 @Setter
-@Table(name="tbl_employees") 
+@Entity
+
 public class Employee {
 
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@NonNull
 	private long id;
 
 	// @Column(name = "name") not required if field name is as same as column name
 	@NonNull
-	@Size(min = 4, message = "must be atleast 4 characters")
+	@Size(min = 5, message = "must be atleast 5 characters")
 	private String name;
 
 	@NotEmpty
