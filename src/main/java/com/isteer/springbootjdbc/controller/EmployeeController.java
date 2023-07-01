@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.isteer.springbootjdbc.dao.*;
 import com.isteer.springbootjdbc.exception.DetailsNotFoundException;
+import com.isteer.springbootjdbc.exception.ConstraintException;
 import com.isteer.springbootjdbc.model.Employee;
 import com.isteer.springbootjdbc.response.CustomDeleteResponse;
 import com.isteer.springbootjdbc.response.CustomGetResponse;
@@ -24,31 +25,30 @@ import com.isteer.springbootjdbc.sqlquery.SqlQueries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 @RestController
 public class EmployeeController {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class.getName());
 
 	@Autowired
 	private EmployeeDAO eDAO;
-	
+
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
 	@GetMapping("/employees")
-	public ResponseEntity<List<Employee>> getEmployees() { 
+	public ResponseEntity<List<Employee>> getEmployees() {
 		return new ResponseEntity<List<Employee>>(eDAO.getAll(), HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/employees/{id}")
 	public ResponseEntity<CustomGetResponse> getEmployeeById(@PathVariable int id) {
 
 		if (jdbcTemplate.queryForObject(SqlQueries.CHECK_ID_IS_PRESENT_QUERY, Long.class, id) == 0) {
 			List<String> exception = new ArrayList<>();
-			exception.add("The details are not present for id "+id);
+			exception.add("The details are not present for id " + id);
 			logger.error("ID is not present.");
-			
+
 			throw new DetailsNotFoundException(0, "NOT_FOUND", exception);
 		} else {
 			logger.info("ID is preesnt and data is retrieved");
@@ -58,33 +58,33 @@ public class EmployeeController {
 
 	@PostMapping("/employees")
 	public ResponseEntity<CustomPostResponse> saveEmployee(@RequestBody Employee employee) {
-		
+
 		List<String> exceptions = new ArrayList<>();
 
-			if(employee.getName()=="" || employee.getEmail()=="" || employee.getDepartment()=="" || employee.getGender()=="" || employee.getDob()=="") {
-				exceptions.add("no field should be empty");
-			}
-			if(employee.getName().length()<5) {
-				exceptions.add("name must have atleast 5 characters");
-			}
-			if(!employee.getEmail().matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")){
-				exceptions.add("email id is not right format");
-			}
-			if(!employee.getGender().matches("Male|Female|Other")) {
-				exceptions.add("Gender must be specified as Male|Female|Other");
-			}
-			if(!employee.getDob().matches("^(1[0-2]|0[1-9])/(3[01]|[12][0-9]|0[1-9])/[0-9]{4}$")) {
-				exceptions.add("Date must be specified as dd-mm-yyyy");
-			}
-			if (exceptions.isEmpty()) {
-				return new ResponseEntity<CustomPostResponse>(eDAO.save(employee), HttpStatus.CREATED) ;
-			}
-			else {
-				throw new ConstraintException(0,"NOT VALID" , exceptions);
-			}
-			 
+		if (employee.getName() == "" || employee.getEmail() == "" || employee.getDepartment() == ""
+				|| employee.getGender() == "" || employee.getDob() == "") {
+			exceptions.add("no field should be empty");
+		}
+		if (employee.getName().length() < 5) {
+			exceptions.add("name must have atleast 5 characters");
+		}
+		if (!employee.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.]+[a-zA-Z]{2,}$")) {
+			exceptions.add("email id is not right format");
+		}
+		if (!employee.getGender().matches("Male|Female|Other")) {
+			exceptions.add("Gender must be specified as Male|Female|Other");
+		}
+		if (!employee.getDob().matches("^(1[0-2]|0[1-9])/(3[01]|[12][0-9]|0[1-9])/[0-9]{4}$")) {
+			exceptions.add("Date must be specified as dd-mm-yyyy");
+		}
+		if (exceptions.isEmpty()) {
+			return new ResponseEntity<CustomPostResponse>(eDAO.save(employee), HttpStatus.CREATED);
+		} else {
+			throw new ConstraintException(0, "NOT VALID", exceptions);
+		}
+
 	}
-	
+
 	@PutMapping("/employees/{id}")
 	public ResponseEntity<CustomPostResponse> updateEmployee(@Valid @RequestBody Employee employee,@PathVariable int id) {
 		
