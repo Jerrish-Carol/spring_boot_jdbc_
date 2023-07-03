@@ -22,13 +22,13 @@ import com.isteer.springbootjdbc.response.CustomDeleteResponse;
 import com.isteer.springbootjdbc.response.CustomGetResponse;
 import com.isteer.springbootjdbc.response.CustomPostResponse;
 import com.isteer.springbootjdbc.sqlquery.SqlQueries;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;    
 
 @RestController
 public class EmployeeController {
 
-	private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class.getName());
+	private static Logger logger = Logger.getLogger(EmployeeController.class); 
+	
 
 	@Autowired
 	private EmployeeDAO eDAO;
@@ -51,7 +51,7 @@ public class EmployeeController {
 
 			throw new DetailsNotFoundException(0, "NOT_FOUND", exception);
 		} else {
-			logger.info("ID is preesnt and data is retrieved");
+			logger.info("ID is present and data is retrieved");
 			return new ResponseEntity<CustomGetResponse>(eDAO.getById(id), HttpStatus.OK);
 		}
 	}
@@ -74,7 +74,7 @@ public class EmployeeController {
 		if (!employee.getGender().matches("Male|Female|Other")) {
 			exceptions.add("Gender must be specified as Male|Female|Other");
 		}
-		if (!employee.getDob().matches("^(1[0-2]|0[1-9])/(3[01]|[12][0-9]|0[1-9])/[0-9]{4}$")) {
+		if (!employee.getDob().matches("^(0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[0-2])-(19|20)\\d{2}$")) {
 			exceptions.add("Date must be specified as dd-mm-yyyy");
 		}
 		if (exceptions.isEmpty()) {
@@ -99,15 +99,15 @@ public class EmployeeController {
 	@DeleteMapping("/employees/{id}")
 	public ResponseEntity<CustomDeleteResponse> deleteEmployeeById(@PathVariable int id) {
 
-		if (jdbcTemplate.queryForObject(SqlQueries.CHECK_ID_IS_PRESENT_QUERY, Long.class, id) == 1) {
+		if (jdbcTemplate.queryForObject(SqlQueries.CHECK_ID_IS_PRESENT_QUERY, Long.class, id) == 0) {
 		
-			return new ResponseEntity<CustomDeleteResponse>(eDAO.delete(id),HttpStatus.OK);
-			
-		}
-		else {
 			List<String> exception = new ArrayList<>();
 			exception.add("Not data present to delete");
 			throw new DetailsNotFoundException(0, "NOT_DELETED", exception);
+		
+		}
+		else {
+			return new ResponseEntity<CustomDeleteResponse>(eDAO.delete(id),HttpStatus.OK);
 		}
 		
 	}

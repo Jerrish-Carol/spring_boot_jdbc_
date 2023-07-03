@@ -27,8 +27,6 @@ public class EmployeeDaoImpl implements EmployeeDAO {
 	@Autowired
 	private JdbcTemplate jdbcTemplate; //spring will create this and put in Ioc Container
 	
-	/*ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-	Validator validator = factory.getValidator();*/
 	
 	@Override
 	public CustomPostResponse save(Employee employee) { 
@@ -46,19 +44,7 @@ public class EmployeeDaoImpl implements EmployeeDAO {
           
             return ps;
         }, keyHolder)==1) {
-			employee.setId(keyHolder.getKey().longValue());
-			
-			/*Set<ConstraintViolation<Employee>> violations = validator.validate(employee);
-			if (!violations.isEmpty()) {
-				System.out.println(violations);
-			    for (ConstraintViolation<Employee> violation : violations) {
-			        System.out.println(violation.getPropertyPath() + ": " + violation.getMessage());
-			    }
-			    return null;
-			} else {
-				return new CustomPostResponse(1, "SAVED", employee);
-			}*/
-		
+			employee.setId(keyHolder.getKey().longValue());	
 			return new CustomPostResponse(1, "SAVED", employee);
 		}
 		else {
@@ -76,7 +62,24 @@ public class EmployeeDaoImpl implements EmployeeDAO {
 		if (jdbcTemplate.update(SqlQueries.UPDATE_EMPLOYEES_BY_ID_QUERY, new Object[] { employee.getName(),
 			employee.getDob(), employee.getGender(), employee.getEmail(), employee.getDepartment(), id }) == 1) {
 			employee.setId(id);
-			return new CustomPostResponse(1, "UPDATED", employee);
+			return new CustomPostResponse(1, "UPDATED", jdbcTemplate.queryForObject(SqlQueries.GET_EMPLOYEES_BY_ID_QUERY, new BeanPropertyRowMapper<Employee>() {
+				
+				public Employee mapRow(ResultSet rs, int rowNum) throws SQLException {
+					Employee employee = new Employee();
+					employee.setId(rs.getLong("id"));
+					employee.setName(rs.getString("name"));
+					employee.setEmail(rs.getString("email"));
+					employee.setDob(rs.getString("dob"));
+					employee.setGender(rs.getString("gender"));
+					employee.setDepartment(rs.getString("department"));
+					employee.setIsAccountLocked(rs.getBoolean("is_account_locked"));
+					employee.setIsActive(rs.getBoolean("is_active"));
+				
+				return employee;
+				}
+
+			},id));
+
 		}
 
 		else {
