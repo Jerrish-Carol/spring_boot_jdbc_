@@ -89,7 +89,29 @@ public class EmployeeController {
 	public ResponseEntity<CustomPostResponse> updateEmployee(@Valid @RequestBody Employee employee,@PathVariable int id) {
 		
 		if(eDAO.getById(id) != null) {
-			return new ResponseEntity<CustomPostResponse>(eDAO.update(employee,id),HttpStatus.OK);
+			List<String> exceptions = new ArrayList<>();
+
+			if (employee.getName() == "" || employee.getEmail() == "" || employee.getDepartment() == ""
+					|| employee.getGender() == "" || employee.getDob() == "") {
+				exceptions.add("no field should be empty");
+			}
+			if (employee.getName().length() < 5) {
+				exceptions.add("name must have atleast 5 characters");
+			}
+			if (!employee.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.]+[a-zA-Z]{2,}$")) {
+				exceptions.add("email id is not right format");
+			}
+			if (!employee.getGender().matches("Male|Female|Other")) {
+				exceptions.add("Gender must be specified as Male|Female|Other");
+			}
+			if (!employee.getDob().matches("^(0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[0-2])-(19|20)\\d{2}$")) {
+				exceptions.add("Date must be specified as dd-mm-yyyy");
+			}
+			if (exceptions.isEmpty()) {
+				return new ResponseEntity<CustomPostResponse>(eDAO.update(employee,id),HttpStatus.OK);
+			} else {
+				throw new ConstraintException(0, "NOT VALID", exceptions);
+			}
 		}
 		else {
 			return new ResponseEntity<CustomPostResponse>(eDAO.update(employee,id),HttpStatus.NOT_FOUND);
