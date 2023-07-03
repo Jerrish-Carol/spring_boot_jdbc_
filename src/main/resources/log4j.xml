@@ -14,7 +14,7 @@
 	<appender name="file" class="org.apache.log4j.DailyRollingFileAppender"> 
 		<param name="append" value="true" /> 
 		<param name="DatePattern" value="'.'yyyy-MM-dd"/> 
-		<param name="file" value="C:/Users/jerrish.carol_isteer/git/springboot-log4j-xml/src/main/resources/myApp.log" /> 
+		<param name="file" value="C:/Users/jerrish.carol_isteer/Documents/workspace-spring-tool-suite-4-4.18.1.RELEASE/springbootjdbc/src/main/resources/logs.log" /> 
 		<layout class="org.apache.log4j.PatternLayout"> 
 			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" /> 
 		</layout> 
@@ -23,6 +23,7 @@
 	<root>
 		<level value="ALL" />
 		<appender-ref ref="file" />
+		<appender-ref ref="console"/>
 	</root>
 
 </log4j:configuration>
