@@ -38,6 +38,7 @@ public class EmployeeController {
 
 	@GetMapping("/employees")
 	public ResponseEntity<List<Employee>> getEmployees() {
+		logger.info("Data is retrieved");
 		return new ResponseEntity<List<Employee>>(eDAO.getAll(), HttpStatus.OK);
 	}
 
@@ -64,22 +65,30 @@ public class EmployeeController {
 		if (employee.getName() == "" || employee.getEmail() == "" || employee.getDepartment() == ""
 				|| employee.getGender() == "" || employee.getDob() == "") {
 			exceptions.add("no field should be empty");
+			logger.error("no field should be empty");
 		}
 		if (employee.getName().length() < 5) {
 			exceptions.add("name must have atleast 5 characters");
+			logger.error("name must have atleast 5 characters");
 		}
 		if (!employee.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.]+[a-zA-Z]{2,}$")) {
 			exceptions.add("email id is not right format");
+			logger.error("email id is not right format");
 		}
 		if (!employee.getGender().matches("Male|Female|Other")) {
 			exceptions.add("Gender must be specified as Male|Female|Other");
+			logger.error("Gender must be specified as Male|Female|Other");
 		}
 		if (!employee.getDob().matches("^(0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[0-2])-(19|20)\\d{2}$")) {
 			exceptions.add("Date must be specified as dd-mm-yyyy");
+			logger.error("Date must be specified as dd-mm-yyyy");
 		}
 		if (exceptions.isEmpty()) {
+			logger.info("Details are saved");
 			return new ResponseEntity<CustomPostResponse>(eDAO.save(employee), HttpStatus.CREATED);
+			
 		} else {
+			logger.fatal("Not valid");
 			throw new ConstraintException(0, "NOT VALID", exceptions);
 		}
 
@@ -108,8 +117,10 @@ public class EmployeeController {
 				exceptions.add("Date must be specified as dd-mm-yyyy");
 			}
 			if (exceptions.isEmpty()) {
+				logger.info("Data is valid and updated");
 				return new ResponseEntity<CustomPostResponse>(eDAO.update(employee,id),HttpStatus.OK);
 			} else {
+				logger.error("Data is not valid so not updated");
 				throw new ConstraintException(0, "NOT VALID", exceptions);
 			}
 		}
@@ -125,10 +136,12 @@ public class EmployeeController {
 		
 			List<String> exception = new ArrayList<>();
 			exception.add("Not data present to delete");
+			logger.error("ID is not present, nothing to delete");
 			throw new DetailsNotFoundException(0, "NOT_DELETED", exception);
 		
 		}
 		else {
+			logger.info("ID is present, details deleted");
 			return new ResponseEntity<CustomDeleteResponse>(eDAO.delete(id),HttpStatus.OK);
 		}
 		

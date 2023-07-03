@@ -8,11 +8,15 @@ import java.util.List;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+
+import com.isteer.springbootjdbc.controller.EmployeeController;
 import com.isteer.springbootjdbc.exception.DetailsNotProvidedException;
 import com.isteer.springbootjdbc.model.Employee;
 import com.isteer.springbootjdbc.response.CustomDeleteResponse;
@@ -23,6 +27,7 @@ import com.isteer.springbootjdbc.sqlquery.SqlQueries;
 @Repository 
 public class EmployeeDaoImpl implements EmployeeDAO {
 	
+	private static Logger logger = Logger.getLogger(EmployeeDaoImpl.class); 
 	
 	@Autowired
 	private JdbcTemplate jdbcTemplate; //spring will create this and put in Ioc Container
@@ -44,7 +49,7 @@ public class EmployeeDaoImpl implements EmployeeDAO {
           
             return ps;
         }, keyHolder)==1) {
-			employee.setId(keyHolder.getKey().longValue());	
+			employee.setId(keyHolder.getKey().longValue());
 			return new CustomPostResponse(1, "SAVED", employee);
 		}
 		else {
@@ -74,7 +79,6 @@ public class EmployeeDaoImpl implements EmployeeDAO {
 					employee.setDepartment(rs.getString("department"));
 					employee.setIsAccountLocked(rs.getBoolean("is_account_locked"));
 					employee.setIsActive(rs.getBoolean("is_active"));
-				
 				return employee;
 				}
 
