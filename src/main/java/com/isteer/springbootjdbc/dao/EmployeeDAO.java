@@ -17,5 +17,7 @@ public interface EmployeeDAO {
 	
 	List<Employee> getAll();
 	
-	CustomGetResponse getById(long id);
+	Employee getById(long id);
+
+	
 }

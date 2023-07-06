@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.isteer.springbootjdbc.dao.*;
 import com.isteer.springbootjdbc.exception.DetailsNotFoundException;
 import com.isteer.springbootjdbc.exception.ConstraintException;
+import com.isteer.springbootjdbc.model.Address;
 import com.isteer.springbootjdbc.model.Employee;
 import com.isteer.springbootjdbc.response.CustomDeleteResponse;
 import com.isteer.springbootjdbc.response.CustomGetResponse;
 import com.isteer.springbootjdbc.response.CustomPostResponse;
+import com.isteer.springbootjdbc.service.EmployeeService;
 import com.isteer.springbootjdbc.sqlquery.SqlQueries;
 import org.apache.log4j.Logger;    
 
@@ -29,7 +31,9 @@ public class EmployeeController {
 
 	private static Logger logger = Logger.getLogger(EmployeeController.class); 
 	
-
+	@Autowired
+	private EmployeeService eService;
+	
 	@Autowired
 	private EmployeeDAO eDAO;
 
@@ -53,7 +57,7 @@ public class EmployeeController {
 			throw new DetailsNotFoundException(0, "NOT_FOUND", exception);
 		} else {
 			logger.info("ID is present and data is retrieved");
-			return new ResponseEntity<CustomGetResponse>(eDAO.getById(id), HttpStatus.OK);
+			return new ResponseEntity<CustomGetResponse>(eService.getEmployeeWithAddressesandId(id), HttpStatus.OK);
 		}
 	}
 
@@ -61,9 +65,10 @@ public class EmployeeController {
 	public ResponseEntity<CustomPostResponse> saveEmployee(@RequestBody Employee employee) {
 
 		List<String> exceptions = new ArrayList<>();
+		
 
 		if (employee.getName() == "" || employee.getEmail() == "" || employee.getDepartment() == ""
-				|| employee.getGender() == "" || employee.getDob() == "") {
+				|| employee.getGender() == "" || employee.getDob() == "" || employee.addresses == null) {
 			exceptions.add("no field should be empty");
 			logger.error("no field should be empty");
 		}
@@ -83,11 +88,15 @@ public class EmployeeController {
 			exceptions.add("Date must be specified as dd-mm-yyyy");
 			logger.error("Date must be specified as dd-mm-yyyy");
 		}
-		if (exceptions.isEmpty()) {
+		
+		if(exceptions.isEmpty()) {
 			logger.info("Details are saved");
-			return new ResponseEntity<CustomPostResponse>(eDAO.save(employee), HttpStatus.CREATED);
+			//eService.saveEmployeeWithAddresses(employee);
+			return new ResponseEntity<CustomPostResponse>(eService.saveEmployeeWithAddresses(employee),HttpStatus.CREATED);
 			
-		} else {
+		}
+		
+		else {
 			logger.fatal("Not valid");
 			throw new ConstraintException(0, "NOT VALID", exceptions);
 		}

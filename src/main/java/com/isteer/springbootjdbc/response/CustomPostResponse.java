@@ -2,8 +2,6 @@ package com.isteer.springbootjdbc.response;
 
 import lombok.Data;
 
-import org.springframework.jdbc.core.RowMapper;
-
 import com.isteer.springbootjdbc.model.Employee;
 
 @Data
