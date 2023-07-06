@@ -47,7 +47,7 @@ public class EmployeeController {
 	}
 
 	@GetMapping("/employees/{id}")
-	public ResponseEntity<CustomGetResponse> getEmployeeById(@PathVariable int id) {
+	public ResponseEntity<CustomGetResponse> getEmployeeById(@PathVariable long id) {
 
 		if (jdbcTemplate.queryForObject(SqlQueries.CHECK_ID_IS_PRESENT_QUERY, Long.class, id) == 0) {
 			List<String> exception = new ArrayList<>();
@@ -104,10 +104,11 @@ public class EmployeeController {
 	}
 
 	@PutMapping("/employees/{id}")
-	public ResponseEntity<CustomPostResponse> updateEmployee(@Valid @RequestBody Employee employee,@PathVariable int id) {
-		
+	public ResponseEntity<CustomPostResponse> updateEmployee(@Valid @RequestBody Employee employee,@PathVariable long id) {
+		employee = eDAO.getById(id);
 		if(eDAO.getById(id) != null) {
 			List<String> exceptions = new ArrayList<>();
+			System.out.println(employee.getId());
 
 			if (employee.getName() == "" || employee.getEmail() == "" || employee.getDepartment() == ""
 					|| employee.getGender() == "" || employee.getDob() == "") {
@@ -127,13 +128,14 @@ public class EmployeeController {
 			}
 			if (exceptions.isEmpty()) {
 				logger.info("Data is valid and updated");
-				return new ResponseEntity<CustomPostResponse>(eDAO.update(employee,id),HttpStatus.OK);
+				return new ResponseEntity<CustomPostResponse>(eService.updateEmployeeWithAddressesandId(employee,id),HttpStatus.OK);
 			} else {
 				logger.error("Data is not valid so not updated");
 				throw new ConstraintException(0, "NOT VALID", exceptions);
 			}
 		}
 		else {
+			
 			return new ResponseEntity<CustomPostResponse>(eDAO.update(employee,id),HttpStatus.NOT_FOUND);
 		}	
 	}

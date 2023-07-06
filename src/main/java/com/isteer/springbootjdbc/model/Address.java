@@ -1,5 +1,7 @@
 package com.isteer.springbootjdbc.model;
 
+import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -11,8 +13,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Address {
+public class Address implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private long address_id;
 	
 	private long employee_id;

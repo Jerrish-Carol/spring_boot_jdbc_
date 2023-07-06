@@ -7,4 +7,6 @@ import com.isteer.springbootjdbc.response.CustomPostResponse;
 public interface AddressDAO {
 
 	CustomPostResponse save(List<Address> addresses, Long id);
+	
+	CustomPostResponse update(List<Address> addresses, Long id);
 }

@@ -24,14 +24,20 @@ public class EmployeeService {
 		eDAO.save(employee);
 		aDAO.save(employee.getAddresses(), employee.getId());
 		return new CustomPostResponse(0, "DATA SAVED", eDAO.getById(employee.getId()));
-
 	}
 	
 	@Transactional
 	public CustomGetResponse getEmployeeWithAddressesandId(long id) {
 		eDAO.getById(id);
-		//aDAO.getById(id);
-		return null;
+		return new CustomGetResponse(eDAO.getById(id));
+
+	}
+	
+	@Transactional
+	public CustomPostResponse updateEmployeeWithAddressesandId(Employee employee,long id) {
+		eDAO.update(employee, id);
+		aDAO.update(employee.getAddresses(), id);
+		return new CustomPostResponse(0,"DATA UPDATED", eDAO.getById(id));
 
 	}
 }

@@ -50,7 +50,34 @@ public class AddressDaoImpl implements AddressDAO {
 			return null;
 	}
 	
-	
+	public CustomPostResponse update(List<Address> addresses, Long id) {
+		
+		jdbcTemplate.batchUpdate(SqlQueries.UPDATE_ADDRESS_BY_ID_QUERY, new BatchPreparedStatementSetter() {
 
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				Address address = addresses.get(i);
+	
+				ps.setString(1, address.getStreet());
+				ps.setString(2, address.getCity());
+				ps.setString(3, address.getState());
+				ps.setString(4, address.getCountry());
+				ps.setLong(5, id);
+				
+			
+			}
+
+			@Override
+			public int getBatchSize() {
+
+				System.out.println(addresses.size());
+				return addresses.size();
+			}
+			
+
+		});
+		return null;
+	}
+	
 }
 
