@@ -2,8 +2,11 @@ package com.isteer.springbootjdbc.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.isteer.springbootjdbc.dao.*;
 import com.isteer.springbootjdbc.exception.DetailsNotFoundException;
+import com.isteer.springbootjdbc.exception.DetailsNotProvidedException;
 import com.isteer.springbootjdbc.exception.ConstraintException;
 import com.isteer.springbootjdbc.model.Address;
 import com.isteer.springbootjdbc.model.Employee;
@@ -35,7 +39,13 @@ public class EmployeeController {
 	private EmployeeService eService;
 	
 	@Autowired
-	private EmployeeDAO eDAO;
+	private EmployeeDao eDAO;
+	
+	@Autowired
+	private AddressDao aDAO;
+	
+	@Autowired
+	private MessageSource messageSource;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -53,8 +63,8 @@ public class EmployeeController {
 			List<String> exception = new ArrayList<>();
 			exception.add("The details are not present for id " + id);
 			logger.error("ID is not present.");
-
-			throw new DetailsNotFoundException(0, "NOT_FOUND", exception);
+		
+			throw new DetailsNotFoundException(0, messageSource.getMessage("error.notfound", null, Locale.getDefault()) , exception);
 		} else {
 			logger.info("ID is present and data is retrieved");
 			return new ResponseEntity<CustomGetResponse>(eService.getEmployeeWithAddressesandId(id), HttpStatus.OK);
@@ -64,41 +74,19 @@ public class EmployeeController {
 	@PostMapping("/employees")
 	public ResponseEntity<CustomPostResponse> saveEmployee(@RequestBody Employee employee) {
 
-		List<String> exceptions = new ArrayList<>();
+	   List<String> exceptions = eDAO.validateEmployee(employee);
 		
-
-		if (employee.getName() == "" || employee.getEmail() == "" || employee.getDepartment() == ""
-				|| employee.getGender() == "" || employee.getDob() == "" || employee.addresses == null) {
-			exceptions.add("no field should be empty");
-			logger.error("no field should be empty");
-		}
-		if (employee.getName().length() < 5) {
-			exceptions.add("name must have atleast 5 characters");
-			logger.error("name must have atleast 5 characters");
-		}
-		if (!employee.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.]+[a-zA-Z]{2,}$")) {
-			exceptions.add("email id is not right format");
-			logger.error("email id is not right format");
-		}
-		if (!employee.getGender().matches("Male|Female|Other")) {
-			exceptions.add("Gender must be specified as Male|Female|Other");
-			logger.error("Gender must be specified as Male|Female|Other");
-		}
-		if (!employee.getDob().matches("^(0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[0-2])-(19|20)\\d{2}$")) {
-			exceptions.add("Date must be specified as dd-mm-yyyy");
-			logger.error("Date must be specified as dd-mm-yyyy");
-		}
-		
-		if(exceptions.isEmpty()) {
-			logger.info("Details are saved");
-			//eService.saveEmployeeWithAddresses(employee);
+	   List<String> exception = aDAO.validateAddresses(employee);
+	   
+		if (exceptions.isEmpty() && exception.isEmpty()) {
 			return new ResponseEntity<CustomPostResponse>(eService.saveEmployeeWithAddresses(employee),HttpStatus.CREATED);
-			
 		}
-		
+		else if(!exception.isEmpty() && exceptions.isEmpty()) {
+			throw new DetailsNotFoundException(0, messageSource.getMessage("error.detailsnotprovided", null, Locale.getDefault()), exception);
+		}
 		else {
-			logger.fatal("Not valid");
-			throw new ConstraintException(0, "NOT VALID", exceptions);
+			exceptions.addAll(exception);
+			throw new ConstraintException(0, messageSource.getMessage("error.constrainsinvalid", null, Locale.getDefault()), exceptions);
 		}
 
 	}
@@ -106,36 +94,25 @@ public class EmployeeController {
 	@PutMapping("/employees/{id}")
 	public ResponseEntity<CustomPostResponse> updateEmployee(@Valid @RequestBody Employee employee,@PathVariable long id) {
 		employee = eDAO.getById(id);
-		if(eDAO.getById(id) != null) {
-			List<String> exceptions = new ArrayList<>();
-			System.out.println(employee.getId());
 
-			if (employee.getName() == "" || employee.getEmail() == "" || employee.getDepartment() == ""
-					|| employee.getGender() == "" || employee.getDob() == "") {
-				exceptions.add("no field should be empty");
-			}
-			if (employee.getName().length() < 5) {
-				exceptions.add("name must have atleast 5 characters");
-			}
-			if (!employee.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.]+[a-zA-Z]{2,}$")) {
-				exceptions.add("email id is not right format");
-			}
-			if (!employee.getGender().matches("Male|Female|Other")) {
-				exceptions.add("Gender must be specified as Male|Female|Other");
-			}
-			if (!employee.getDob().matches("^(0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[0-2])-(19|20)\\d{2}$")) {
-				exceptions.add("Date must be specified as dd-mm-yyyy");
-			}
-			if (exceptions.isEmpty()) {
-				logger.info("Data is valid and updated");
-				return new ResponseEntity<CustomPostResponse>(eService.updateEmployeeWithAddressesandId(employee,id),HttpStatus.OK);
+		if (eDAO.getById(id) != null) {
+		
+			List<String> exceptions = eDAO.validateEmployee(employee);
+
+			List<String> exception = aDAO.validateAddresses(employee);
+
+			if (exceptions.isEmpty() && exception.isEmpty()) {
+				return new ResponseEntity<CustomPostResponse>(eService.updateEmployeeWithAddressesandId(employee),
+						HttpStatus.OK);
+			} else if (!exception.isEmpty() && exceptions.isEmpty()) {
+				throw new DetailsNotFoundException(0, messageSource.getMessage("error.detailsnotprovided", null, Locale.getDefault()), exception);
 			} else {
-				logger.error("Data is not valid so not updated");
-				throw new ConstraintException(0, "NOT VALID", exceptions);
+				exceptions.addAll(exception);
+				throw new ConstraintException(0, messageSource.getMessage("error.constrainsinvalid", null, Locale.getDefault()), exceptions);
 			}
-		}
-		else {
-			
+
+		} else {
+
 			return new ResponseEntity<CustomPostResponse>(eDAO.update(employee,id),HttpStatus.NOT_FOUND);
 		}	
 	}
@@ -148,7 +125,7 @@ public class EmployeeController {
 			List<String> exception = new ArrayList<>();
 			exception.add("Not data present to delete");
 			logger.error("ID is not present, nothing to delete");
-			throw new DetailsNotFoundException(0, "NOT_DELETED", exception);
+			throw new DetailsNotFoundException(0, messageSource.getMessage("error.nocontenttodelete", null, Locale.getDefault()), exception);
 		
 		}
 		else {

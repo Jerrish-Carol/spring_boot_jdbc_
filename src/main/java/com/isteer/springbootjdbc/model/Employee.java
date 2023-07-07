@@ -32,6 +32,8 @@ public class Employee {
 
 	private String department;
 	
+	private long role_id;
+	
 	public List<Address> addresses;
 	
 	

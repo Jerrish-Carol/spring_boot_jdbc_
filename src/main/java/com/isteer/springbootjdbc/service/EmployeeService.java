@@ -1,6 +1,9 @@
 package com.isteer.springbootjdbc.service;
 
+import java.util.Locale;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +22,15 @@ public class EmployeeService {
 
 	@Autowired
 	private AddressDaoImpl aDAO;
+	
+	@Autowired
+	private MessageSource messageSource;
+	
 	@Transactional
 	public CustomPostResponse saveEmployeeWithAddresses(Employee employee) {
 		eDAO.save(employee);
-		aDAO.save(employee.getAddresses(), employee.getId());
-		return new CustomPostResponse(0, "DATA SAVED", eDAO.getById(employee.getId()));
+		aDAO.save(employee.getAddresses(), employee.getId()); //success.detailssaved
+		return new CustomPostResponse(0, messageSource.getMessage("success.detailssaved", null, Locale.getDefault()), eDAO.getById(employee.getId()));
 	}
 	
 	@Transactional
@@ -34,10 +41,10 @@ public class EmployeeService {
 	}
 	
 	@Transactional
-	public CustomPostResponse updateEmployeeWithAddressesandId(Employee employee,long id) {
-		eDAO.update(employee, id);
-		aDAO.update(employee.getAddresses(), id);
-		return new CustomPostResponse(0,"DATA UPDATED", eDAO.getById(id));
+	public CustomPostResponse updateEmployeeWithAddressesandId(Employee employee) { //success.detailsupdated
+		eDAO.update(employee, employee.getId());
+		aDAO.update(employee.getAddresses(), employee.getId());
+		return new CustomPostResponse(0,messageSource.getMessage("success.detailsupdated", null, Locale.getDefault()), eDAO.getById(employee.getId()));
 
 	}
 }
