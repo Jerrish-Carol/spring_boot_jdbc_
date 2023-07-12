@@ -1,14 +1,17 @@
 package com.isteer.springbootjdbc.response;
 
 import lombok.Data;
+
+import java.util.List;
+
 import com.isteer.springbootjdbc.model.Employee;
 
 @Data
 public class CustomGetResponse {
 
-	private Employee employee;
+	private List<Employee> employee;
 
-	public CustomGetResponse(Employee employee) {
+	public CustomGetResponse(List<Employee> employee) {
 		this.employee = employee;
 	}
 }

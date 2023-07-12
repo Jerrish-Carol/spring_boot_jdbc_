@@ -1,0 +1,50 @@
+2023-07-10 09:28:59 INFO  EmployeeController:58 - Data is retrieved
+2023-07-10 09:35:54 INFO  EmployeeController:58 - Data is retrieved
+2023-07-10 09:36:21 INFO  EmployeeController:58 - Data is retrieved
+2023-07-10 09:37:04 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 09:48:11 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 10:08:56 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 10:11:47 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 10:15:15 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 12:36:10 INFO  RoleController:121 - ID is present, details deleted
+2023-07-10 12:49:32 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 12:49:54 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 15:24:11 INFO  EmployeeController:58 - Data is retrieved
+2023-07-10 15:29:36 INFO  EmployeeController:58 - Data is retrieved
+2023-07-10 15:35:11 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 15:35:33 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 17:15:28 INFO  EmployeeDaoImpl:94 - Jerrish Carol
+2023-07-10 17:15:28 INFO  EmployeeDaoImpl:95 - jerrishcarol@gmail.com
+2023-07-10 17:15:28 INFO  EmployeeDaoImpl:96 - IT
+2023-07-10 17:16:01 INFO  EmployeeDaoImpl:94 - Jerrish Carol
+2023-07-10 17:16:01 INFO  EmployeeDaoImpl:95 - jerrishcarol@gmail.com
+2023-07-10 17:16:01 INFO  EmployeeDaoImpl:96 - IT
+2023-07-10 17:18:29 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 17:18:55 INFO  EmployeeDaoImpl:94 - Jerrish Carol
+2023-07-10 17:18:55 INFO  EmployeeDaoImpl:95 - jerrishcarol@gmail.com
+2023-07-10 17:18:55 INFO  EmployeeDaoImpl:96 - IT
+2023-07-10 18:27:04 INFO  EmployeeDaoImpl:94 - Jerrish Carol
+2023-07-10 18:27:04 INFO  EmployeeDaoImpl:95 - jerrishcarol@gmail.com
+2023-07-10 18:27:04 INFO  EmployeeDaoImpl:96 - IT
+2023-07-10 18:27:11 INFO  EmployeeDaoImpl:94 - Jerrish Carol
+2023-07-10 18:27:11 INFO  EmployeeDaoImpl:95 - jerrishcarol@gmail.com
+2023-07-10 18:27:11 INFO  EmployeeDaoImpl:96 - IT
+2023-07-10 18:31:38 INFO  EmployeeDaoImpl:94 - Chidambaram
+2023-07-10 18:31:38 INFO  EmployeeDaoImpl:95 - chidambaramlakshmanan@gmail.com
+2023-07-10 18:31:38 INFO  EmployeeDaoImpl:96 - IT
+2023-07-10 18:34:54 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 18:36:08 INFO  EmployeeDaoImpl:94 - Jerrish Carol
+2023-07-10 18:36:08 INFO  EmployeeDaoImpl:95 - jerrishcarol@gmail.com
+2023-07-10 18:36:08 INFO  EmployeeDaoImpl:96 - IT
+2023-07-10 19:03:49 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 22:20:54 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 22:21:40 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-10 22:23:00 INFO  EmployeeDaoImpl:94 - Jerrish Carol
+2023-07-10 22:23:00 INFO  EmployeeDaoImpl:95 - jerrishcarol@gmail.com
+2023-07-10 22:23:00 INFO  EmployeeDaoImpl:96 - IT
+2023-07-10 22:23:11 INFO  EmployeeDaoImpl:94 - Jerrish Carol
+2023-07-10 22:23:11 INFO  EmployeeDaoImpl:95 - jerrishcarol@gmail.com
+2023-07-10 22:23:11 INFO  EmployeeDaoImpl:96 - IT
+2023-07-10 22:28:10 INFO  EmployeeDaoImpl:94 - Jerrish Carol
+2023-07-10 22:28:10 INFO  EmployeeDaoImpl:95 - jerrishcarol@gmail.com
+2023-07-10 22:28:10 INFO  EmployeeDaoImpl:96 - IT

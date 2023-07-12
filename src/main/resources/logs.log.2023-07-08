@@ -1,0 +1,10 @@
+2023-07-08 09:07:24 ERROR RoleController:63 - Role ID is not present.
+2023-07-08 09:08:20 ERROR RoleController:116 - ID is not present, nothing to delete
+2023-07-08 09:08:49 ERROR RoleController:63 - Role ID is not present.
+2023-07-08 10:54:24 ERROR RoleController:63 - Role ID is not present.
+2023-07-08 12:16:14 ERROR EmployeeDaoImpl:174 - no fields should be empty
+2023-07-08 19:55:33 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-08 19:57:22 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-08 19:58:19 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-08 19:59:25 INFO  EmployeeController:72 - ID is present and data is retrieved
+2023-07-08 20:00:40 INFO  EmployeeController:72 - ID is present and data is retrieved

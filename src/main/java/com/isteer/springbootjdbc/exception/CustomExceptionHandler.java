@@ -16,6 +16,7 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import com.isteer.springbootjdbc.response.CustomErrorResponse;
 import javax.validation.ConstraintViolationException;
+import org.springframework.jdbc.BadSqlGrammarException;
 
 
 @RestControllerAdvice
@@ -23,6 +24,18 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
 	
 	@ExceptionHandler(value = { DetailsNotFoundException.class })
 	public ResponseEntity<Object> handleDetailsNotFoundException(DetailsNotFoundException exception) {
+		long StatusCode = exception.getStatus();
+		List<String> exceptions = exception.getException();
+		String message = exception.getMessage();
+
+		CustomErrorResponse customResponse = new CustomErrorResponse(StatusCode, message, exceptions);
+
+		return new ResponseEntity<>(customResponse, HttpStatus.NOT_FOUND);
+
+	}
+	
+	@ExceptionHandler(value = { DetailsNotProvidedException.class })
+	public ResponseEntity<Object> handleDetailsNotProvidedException(DetailsNotProvidedException exception) {
 		long StatusCode = exception.getStatus();
 		List<String> exceptions = exception.getException();
 		String message = exception.getMessage();
@@ -75,6 +88,19 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
 		CustomErrorResponse customResponse = new CustomErrorResponse(0, PAGE_NOT_FOUND_LOG_CATEGORY, exceptions);
 
 		return new ResponseEntity<>(customResponse, HttpStatus.BAD_REQUEST);
+	}
+	
+
+	@ExceptionHandler(value = { SqlSyntaxException.class })
+	public ResponseEntity<Object> handleSqlSyntaxException(SqlSyntaxException exception) {
+		long StatusCode = exception.getStatus();
+		List<String> exceptions = exception.getException();
+		String message = exception.getMessage();
+
+		CustomErrorResponse customResponse = new CustomErrorResponse(StatusCode, message, exceptions);
+
+		return new ResponseEntity<>(customResponse, HttpStatus.NOT_FOUND);
+
 	}
 	
 }

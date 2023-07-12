@@ -1,26 +1,2 @@
-2023-07-07 06:02:57 INFO  EmployeeController:93 - Details are saved
-2023-07-07 07:42:36 INFO  EmployeeController:45 - Data is retrieved
-2023-07-07 07:43:37 INFO  EmployeeController:155 - ID is present, details deleted
-2023-07-07 08:32:14 INFO  EmployeeController:96 - Details are saved
-2023-07-07 09:35:47 INFO  EmployeeController:45 - Data is retrieved
-2023-07-07 09:36:02 INFO  EmployeeController:158 - ID is present, details deleted
-2023-07-07 09:37:55 INFO  EmployeeController:96 - Details are saved
-2023-07-07 11:06:10 ERROR EmployeeController:77 - no field should be empty
-2023-07-07 11:06:10 ERROR EmployeeController:89 - Gender must be specified as Male|Female|Other
-2023-07-07 11:06:10 FATAL EmployeeController:110 - Not valid
-2023-07-07 11:09:57 ERROR EmployeeController:77 - no field should be empty
-2023-07-07 11:09:57 ERROR EmployeeController:89 - Gender must be specified as Male|Female|Other
-2023-07-07 11:09:57 FATAL EmployeeController:110 - Not valid
-2023-07-07 11:10:25 ERROR EmployeeController:77 - no field should be empty
-2023-07-07 11:10:25 ERROR EmployeeController:89 - Gender must be specified as Male|Female|Other
-2023-07-07 11:10:25 FATAL EmployeeController:110 - Not valid
-2023-07-07 11:16:59 ERROR EmployeeController:77 - no field should be empty
-2023-07-07 11:16:59 ERROR EmployeeController:89 - Gender must be specified as Male|Female|Other
-2023-07-07 11:30:59 ERROR EmployeeController:77 - no field should be empty
-2023-07-07 11:30:59 ERROR EmployeeController:89 - Gender must be specified as Male|Female|Other
-2023-07-07 11:39:26 ERROR EmployeeDaoImpl:216 - no field should be empty
-2023-07-07 11:39:26 ERROR EmployeeDaoImpl:228 - Gender must be specified as Male|Female|Other
-2023-07-07 12:33:25 INFO  EmployeeController:56 - Welcome to our application!
-2023-07-07 12:33:25 INFO  EmployeeController:57 - Data is retrieved
-2023-07-07 12:59:32 ERROR EmployeeDaoImpl:216 - no field should be empty
-2023-07-07 12:59:32 ERROR EmployeeDaoImpl:228 - Gender must be specified as Male|Female|Other
+2023-07-12 10:19:20 INFO  EmployeeController:213 - ID is present and data is retrieved
+2023-07-12 10:23:07 INFO  EmployeeController:213 - ID is present and data is retrieved
