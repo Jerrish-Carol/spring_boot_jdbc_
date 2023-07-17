@@ -1,10 +1,6 @@
 package com.isteer.springbootjdbc.response;
 
 import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -12,15 +8,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomErrorResponse {
 
-	private long StatusCode;
+	private long statusCode;
 
 	private String message;
 
 	private List<String> exception;
 
-	public CustomErrorResponse(long StatusCode, String message, List<String> exception) {
+	public CustomErrorResponse(long statusCode, String message, List<String> exception) {
 		super();
-		this.StatusCode = StatusCode;
+		this.statusCode = statusCode;
 		this.message = message;
 		this.exception = exception;
 	}

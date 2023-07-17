@@ -1,7 +1,6 @@
 package com.isteer.springbootjdbc.model;
 
 import java.io.Serializable;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -10,34 +9,37 @@ import lombok.Setter;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor  
 @Getter
 @Setter
 public class Role implements Serializable{
 
-
 	private static final long serialVersionUID = -2087834523356714516L;
 
-	private long role_id;
+	//@JsonAlias("roleId")
+	private long roleId;
 	
-	private String role;
+	private String roles;
 	
 	private String project;
 	
 	private boolean billable;
 	
-	private String hierarchical_level;
+	//@JsonAlias("hierarchicalLevel")
+	private String hierarchicalLevel;
 	
-	private String bu_name;
+	private String buName;
 	
-	private String bu_head;
+	private String buHead;
 	
-	private String hr_manager;
+	private String hrManager;
+	
+	
 }
 
 
 /*
- * roles
+ * role
  * 
 Software Developer/Engineer
 Full Stack Developer

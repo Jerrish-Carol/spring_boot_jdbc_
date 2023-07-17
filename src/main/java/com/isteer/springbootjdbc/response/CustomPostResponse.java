@@ -3,21 +3,20 @@ package com.isteer.springbootjdbc.response;
 import lombok.Data;
 
 import java.util.List;
-
-import com.isteer.springbootjdbc.model.Employee;
+import com.isteer.springbootjdbc.model.EmployeeResult;
 
 @Data
 public class CustomPostResponse {
 
-	private List<Employee> employee;
+	private List<EmployeeResult> employee;
 
-	private long StatusCode;
+	private long statusCode;
 
 	private String message;
 
-	public CustomPostResponse(long StatusCode, String message, List<Employee> employeeRowMapper) {
+	public CustomPostResponse(long statusCode, String message, List<EmployeeResult> employeeRowMapper) {
 		super();
-		this.StatusCode = StatusCode;
+		this.statusCode = statusCode;
 		this.message = message;
 		this.employee = employeeRowMapper;
 	}

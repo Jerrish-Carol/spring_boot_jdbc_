@@ -16,19 +16,17 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import com.isteer.springbootjdbc.response.CustomErrorResponse;
 import javax.validation.ConstraintViolationException;
-import org.springframework.jdbc.BadSqlGrammarException;
-
 
 @RestControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
 	
 	@ExceptionHandler(value = { DetailsNotFoundException.class })
 	public ResponseEntity<Object> handleDetailsNotFoundException(DetailsNotFoundException exception) {
-		long StatusCode = exception.getStatus();
+		long statusCode = exception.getStatus();
 		List<String> exceptions = exception.getException();
 		String message = exception.getMessage();
 
-		CustomErrorResponse customResponse = new CustomErrorResponse(StatusCode, message, exceptions);
+		CustomErrorResponse customResponse = new CustomErrorResponse(statusCode, message, exceptions);
 
 		return new ResponseEntity<>(customResponse, HttpStatus.NOT_FOUND);
 
@@ -36,11 +34,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
 	
 	@ExceptionHandler(value = { DetailsNotProvidedException.class })
 	public ResponseEntity<Object> handleDetailsNotProvidedException(DetailsNotProvidedException exception) {
-		long StatusCode = exception.getStatus();
+		long statusCode = exception.getStatus();
 		List<String> exceptions = exception.getException();
 		String message = exception.getMessage();
 
-		CustomErrorResponse customResponse = new CustomErrorResponse(StatusCode, message, exceptions);
+		CustomErrorResponse customResponse = new CustomErrorResponse(statusCode, message, exceptions);
 
 		return new ResponseEntity<>(customResponse, HttpStatus.NOT_FOUND);
 
@@ -49,11 +47,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
 	
 	@ExceptionHandler(value = { ConstraintException.class })
 	public ResponseEntity<Object> handleConstraintException(ConstraintException exception) {
-		long StatusCode = exception.getStatus();
+		long statusCode = exception.getStatus();
 		List<String> exceptions = exception.getException();
 		String message = exception.getMessage();
 
-		CustomErrorResponse customResponse = new CustomErrorResponse(StatusCode, message, exceptions);
+		CustomErrorResponse customResponse = new CustomErrorResponse(statusCode, message, exceptions);
 
 		return new ResponseEntity<>(customResponse, HttpStatus.NOT_FOUND);
 	}
@@ -64,7 +62,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
 			HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
 		List<String> exceptions = new ArrayList<>();
-		exception.getBindingResult().getAllErrors().forEach((error) -> {
+		exception.getBindingResult().getAllErrors().forEach (error -> {
 			String fieldName = ((FieldError) error).getField();
 			String message = error.getDefaultMessage();
 			exceptions.add(fieldName + " " + message);
@@ -93,11 +91,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
 
 	@ExceptionHandler(value = { SqlSyntaxException.class })
 	public ResponseEntity<Object> handleSqlSyntaxException(SqlSyntaxException exception) {
-		long StatusCode = exception.getStatus();
+		long statusCode = exception.getStatus();
 		List<String> exceptions = exception.getException();
 		String message = exception.getMessage();
 
-		CustomErrorResponse customResponse = new CustomErrorResponse(StatusCode, message, exceptions);
+		CustomErrorResponse customResponse = new CustomErrorResponse(statusCode, message, exceptions);
 
 		return new ResponseEntity<>(customResponse, HttpStatus.NOT_FOUND);
 

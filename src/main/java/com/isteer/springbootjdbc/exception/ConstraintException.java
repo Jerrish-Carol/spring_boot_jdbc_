@@ -7,13 +7,13 @@ import lombok.Data;
 @Data
 public class ConstraintException extends RuntimeException {
 
-	private long Status;
+	private long status;
 	private String message;
 	private List<String> exception;
 
-	public ConstraintException(long Status, String message, List<String> exception) {
+	public ConstraintException(long status, String message, List<String> exception) {
 			super();
-			this.Status = Status;
+			this.status = status;
 			this.message = message;
 			this.exception = exception;
 		}

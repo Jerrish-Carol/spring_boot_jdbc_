@@ -10,15 +10,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomDeleteResponse {
 	
-	private long StatusCode;
+	private long statusCode;
 
 	private String message;
 
 	private List<String> statement;
 
-	public CustomDeleteResponse(long StatusCode, String message, List<String> statement) {
+	public CustomDeleteResponse(long statusCode, String message, List<String> statement) {
 		super();
-		this.StatusCode = StatusCode;
+		this.statusCode = statusCode;
 		this.message = message;
 		this.statement = statement;
 	}

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import com.isteer.springbootjdbc.model.Employee;
+import com.isteer.springbootjdbc.model.EmployeeResult;
 import com.isteer.springbootjdbc.response.CustomDeleteResponse;
 import com.isteer.springbootjdbc.response.CustomPostResponse;
 
@@ -17,21 +18,12 @@ public interface EmployeeDao {
 	
 	CustomDeleteResponse delete(long id);
 	
-	/*
-	 * List<Employee> getAll();
-	 * 
-	 * Employee getById(long id);
-	 */
-
 	List<String> validateEmployee(@Valid Employee employee);
 
-	List<Employee> getDataFromTables();
+	List<EmployeeResult> getDataFromTables();
 
-	List<Employee> getDataFromTablesUsingId(long id);
+	List<EmployeeResult> getDataFromTablesUsingId(long id);
 
-	//CustomPostResponse updateAndRetrieveEmployeesWithGroupBy(Employee employee,long id);
-
-	
 
 	
 }

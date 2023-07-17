@@ -9,13 +9,13 @@ public class CustomRolePostResponse {
 	
 		private Role role;
 
-		private long StatusCode;
+		private long statusCode;
 
 		private String message;
 
-		public CustomRolePostResponse(long StatusCode, String message, Role role) {
+		public CustomRolePostResponse(long statusCode, String message, Role role) {
 			super();
-			this.StatusCode = StatusCode;
+			this.statusCode = statusCode;
 			this.message = message;
 			this.role = role;
 		}

@@ -3,118 +3,119 @@ package com.isteer.springbootjdbc.dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.function.Consumer;
-
-import javax.validation.Valid;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import com.isteer.springbootjdbc.MessageProperties;
 import com.isteer.springbootjdbc.exception.DetailsNotFoundException;
 import com.isteer.springbootjdbc.exception.SqlSyntaxException;
-import com.isteer.springbootjdbc.model.Address;
 import com.isteer.springbootjdbc.model.Employee;
 import com.isteer.springbootjdbc.model.Role;
+import com.isteer.springbootjdbc.model.VariableDeclaration;
 import com.isteer.springbootjdbc.response.CustomDeleteResponse;
 import com.isteer.springbootjdbc.response.CustomRolePostResponse;
 import com.isteer.springbootjdbc.sqlquery.SqlQueries;
 import com.isteer.springbootjdbc.statuscode.StatusCodes;
+import com.isteer.springbootjdbc.MessageProperties;
 
 @Repository
 public class RoleDaoImpl implements RoleDao {
+	
+	@Autowired
+	private MessageProperties messageproperties;
 
-	private static Logger logger = Logger.getLogger(EmployeeDaoImpl.class);
+	private static Logger logger = Logger.getLogger(RoleDaoImpl.class);
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+	
+	public CustomRolePostResponse save(Role roles) {
 
-	@Autowired
-	private MessageSource messageSource;
-
-	public CustomRolePostResponse save(Role role) {
-		
 		try {
 
-		GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+			GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
 			if (jdbcTemplate.update(con -> {
 				PreparedStatement ps = con.prepareStatement(SqlQueries.INSERT_ROLES_QUERY,
-						PreparedStatement.RETURN_GENERATED_KEYS);
-	
-				ps.setString(1, role.getRole());
-				ps.setString(2, role.getProject());
-				ps.setBoolean(3, role.isBillable());
-				ps.setString(4, role.getHierarchical_level());
-				ps.setString(5, role.getBu_name());
-				ps.setString(6, role.getBu_head());
-				ps.setString(7, role.getHr_manager());
-	
+						Statement.RETURN_GENERATED_KEYS);
+
+				ps.setString(1, roles.getRoles());
+				ps.setString(2, roles.getProject());
+				ps.setBoolean(3, roles.isBillable());
+				ps.setString(4, roles.getHierarchicalLevel());
+				ps.setString(5, roles.getBuName());
+				ps.setString(6, roles.getBuHead());
+				ps.setString(7, roles.getHrManager());
+
 				return ps;
 			}, keyHolder) == 1) {
-				role.setRole_id(keyHolder.getKey().longValue());
+				roles.setRoleId(keyHolder.getKey().longValue());
 			}
 		}
-		catch(DataAccessException exception){
+			catch(NullPointerException nullexceptions) {
+				
+				List<String> exceptions = new ArrayList<>();
+				exceptions.add(nullexceptions.getMessage());
+				throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(), messageproperties.getDuplicateKeyMessage(), exceptions);
+			
+			
+		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageSource.getMessage("error.badsqlsyntax",null, Locale.getDefault()), exceptions);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),exceptions);
 		}
-		
-		return new CustomRolePostResponse(StatusCodes.SUCCESS.getStatusCode(),
-				messageSource.getMessage("success.detailssaved", null, Locale.getDefault()), role);
-		
+
+		return new CustomRolePostResponse(StatusCodes.SUCCESS.getStatusCode(),messageproperties.getDetailsSavedMessage(), roles);
 
 	}
 
 	@Override
 	public List<Role> getAll() {
 
-		List<Role> role = jdbcTemplate.query(SqlQueries.GET_ROLES_QUERY, new ResultSetExtractor<List<Role>>() {
+		return jdbcTemplate.query(SqlQueries.GET_ROLES_QUERY, new ResultSetExtractor<List<Role>>() {
 
 			public List<Role> extractData(ResultSet rs) throws SQLException {
-				List<Role> roles = new ArrayList<Role>();
-				
+				List<Role> roles = new ArrayList<>();
+
 				try {
 
 					while (rs.next()) {
 						Role role = new Role();
-						role.setRole_id(rs.getLong("role_id"));
-						role.setRole(rs.getString("role"));
-						role.setHierarchical_level(rs.getString("hierarchical_level"));
-						role.setProject(rs.getString("project"));
-						role.setBillable(rs.getBoolean("billable"));
-						role.setBu_name(rs.getString("bu_name"));
-						role.setBu_head(rs.getString("bu_head"));
-						role.setHr_manager(rs.getString("hr_manager"));
+						role.setRoleId(rs.getLong(VariableDeclaration.ROLE_ID));
+						role.setRoles(rs.getString(VariableDeclaration.ROLES));
+						role.setHierarchicalLevel(rs.getString(VariableDeclaration.HIERARCHICAL_LEVEL));
+						role.setProject(rs.getString(VariableDeclaration.PROJECT));
+						role.setBillable(rs.getBoolean(VariableDeclaration.BILLABLE));
+						role.setBuName(rs.getString(VariableDeclaration.BUHEAD));
+						role.setBuHead(rs.getString(VariableDeclaration.BUNAME));
+						role.setHrManager(rs.getString(VariableDeclaration.HRMANAGER));
 						roles.add(role);
 
 					}
 				} catch (DataAccessException exception) {
 					List<String> exceptions = new ArrayList<>();
 					exceptions.add(exception.getMessage());
-					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
-							messageSource.getMessage("error.badsqlsyntax", null, Locale.getDefault()), exceptions);
+					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),
+							exceptions);
 				}
 				return roles;
 			}
 
 		});
-		return role;
 
 	}
 
 	@Override
-	public Role getById(long role_id) {
+	public Role getById(long roleId) {
 
-		Role roles = jdbcTemplate.query(SqlQueries.GET_ROLES_QUERY, new ResultSetExtractor<Role>() {
+		return jdbcTemplate.query(SqlQueries.GET_ROLES_BY_ID_QUERY, new ResultSetExtractor<Role>() {
 
 			public Role extractData(ResultSet rs) throws SQLException {
 
@@ -123,155 +124,145 @@ public class RoleDaoImpl implements RoleDao {
 
 					while (rs.next()) {
 
-						role.setRole_id(rs.getLong("role_id"));
-						role.setRole(rs.getString("role"));
+						role.setRoleId(rs.getLong("roleId"));
+						role.setRoles(rs.getString("role"));
 						role.setProject(rs.getString("project"));
 						role.setBillable(rs.getBoolean("billable"));
-						role.setHierarchical_level(rs.getString("hierarchical_level"));
-						role.setBu_name(rs.getString("bu_name"));
-						role.setBu_head(rs.getString("bu_head"));
-						role.setHr_manager(rs.getString("hr_manager"));
+						role.setHierarchicalLevel(rs.getString("hierarchicalLevel"));
+						role.setBuName(rs.getString("buName"));
+						role.setBuHead(rs.getString("buHead"));
+						role.setHrManager(rs.getString("hrManager"));
 
 					}
 					return role;
 				} catch (DataAccessException exception) {
 					List<String> exceptions = new ArrayList<>();
 					exceptions.add(exception.getMessage());
-					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
-							messageSource.getMessage("error.badsqlsyntax", null, Locale.getDefault()), exceptions);
+					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
 				}
 			}
 		});
-		return roles;
 	}
 
 	@Override
-	public CustomRolePostResponse update(Role roles, long role_id) {
-		
+	public CustomRolePostResponse update(Role roles, long roleId) {
+
 		try {
-		if (jdbcTemplate.update(SqlQueries.UPDATE_ROLES_BY_ID_QUERY, roles.getRole(),
-				roles.getProject(), roles.isBillable(), roles.getHierarchical_level(), roles.getBu_name(), roles.getBu_head(), roles.getHr_manager(),role_id) >= 1) {
+			if (jdbcTemplate.update(SqlQueries.UPDATE_ROLES_BY_ID_QUERY, roles.getRoles(), roles.getProject(),
+					roles.isBillable(), roles.getHierarchicalLevel(), roles.getBuName(), roles.getBuHead(),
+					roles.getHrManager(), roleId) >= 1) {
 
-			Role role = jdbcTemplate.query(SqlQueries.GET_ROLES_BY_ID_QUERY, new ResultSetExtractor<Role>() {
+				Role role = jdbcTemplate.query(SqlQueries.GET_ROLES_BY_ID_QUERY, new ResultSetExtractor<Role>() {
 
-				public Role extractData(ResultSet rs) throws SQLException {
+					public Role extractData(ResultSet rs) throws SQLException {
 
-					Role role = new Role();
-					while (rs.next()) {
-						role.setRole_id(rs.getLong("role_id"));
-						role.setRole(rs.getString("role"));
-						role.setProject(rs.getString("project"));
-						role.setBillable(rs.getBoolean("billable"));
-						role.setHierarchical_level(rs.getString("hierarchical_level"));
-						role.setBu_name(rs.getString("bu_name"));
-						role.setBu_head(rs.getString("bu_head"));
-						role.setHr_manager(rs.getString("hr_manager"));
+						Role role = new Role();
+						while (rs.next()) {
+							role.setRoleId(rs.getLong("roleId"));
+							role.setRoles(rs.getString("roles"));
+							role.setProject(rs.getString("project"));
+							role.setBillable(rs.getBoolean("billable"));
+							role.setHierarchicalLevel(rs.getString("hierarchicalLevel"));
+							role.setBuName(rs.getString("buName"));
+							role.setBuHead(rs.getString("buHead"));
+							role.setHrManager(rs.getString("hrManager"));
 
+						}
+						return role;
 					}
-					return role;
-				}
-			}, role_id);
+				}, roleId);
 
-			return new CustomRolePostResponse(StatusCodes.SUCCESS.getStatusCode(), messageSource.getMessage("success.detailssaved", null, Locale.getDefault()), role);
-		} else {
-			List<String> exception = new ArrayList<>();
-			exception.add("Provide all details required");
-			throw new DetailsNotFoundException(StatusCodes.BAD_REQUEST.getStatusCode(), messageSource.getMessage("error.nocontenttoupdate",null, Locale.getDefault()), exception);
-		}
-	
-		}catch (DataAccessException exception) {
+				return new CustomRolePostResponse(StatusCodes.SUCCESS.getStatusCode(),
+						messageproperties.getDetailsSavedMessage(), role);
+			} else {
+				List<String> exception = new ArrayList<>();
+				exception.add("Provide all details required");
+				throw new DetailsNotFoundException(StatusCodes.BAD_REQUEST.getStatusCode(),messageproperties.getNoContentToUpdateMessage(), exception);
+			}
+
+		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
 			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
-					messageSource.getMessage("error.badsqlsyntax", null, Locale.getDefault()), exceptions);
+				messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
 		}
 	}
 
-	
 	@Override
-	public CustomDeleteResponse delete(long role_id) { //using lambda expressions
-		
+	public CustomDeleteResponse delete(long roleId) { // using lambda expressions
+
 		List<String> statement = new ArrayList<>();
 		try {
-			Consumer<String> addToList = Statement -> statement.add("Data in id " + role_id + " is deleted"); //addToList : The addToList variable, which is of type Consumer<String>, represents a lambda expression or a functional interface that defines a behavior to consume a String input.
-																												//Statement : Which represents the input String to be consumed by the lambda expression
-			jdbcTemplate.update(SqlQueries.DELETE_ROLES_BY_ID_QUERY, role_id);
-		}
-		catch(DataAccessException exception){
+			statement.add("Data in id " + roleId + " is deleted"); 
+			jdbcTemplate.update(SqlQueries.DELETE_ROLES_BY_ID_QUERY, roleId);
+		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageSource.getMessage("error.badsqlsyntax",null, Locale.getDefault()), exceptions);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),
+					 exceptions);
 		}
-	
-	  return new CustomDeleteResponse(StatusCodes.SUCCESS.getStatusCode(), messageSource.getMessage("success.detailsdeleted", null, Locale.getDefault()), statement);
-	
+
+		return new CustomDeleteResponse(StatusCodes.SUCCESS.getStatusCode(), messageproperties.getDetailsDeletedMessage(), statement);
+
 	}
 
-	public List<String> validateRoles(Role role) {
-	       
+	public List<String> validateRoles(Role roles) {
+
 		List<String> exceptions = new ArrayList<>();
 
 		try {
 
-			if (role.getRole() == "" || role.getHierarchical_level() == "" || role.getProject() == ""
-					|| !role.isBillable() || role.getBu_head() == "" || role.getBu_name() == ""
-					|| role.getHr_manager() == "") {
+			if (roles.getRoles().equals("")|| roles.getHierarchicalLevel().equals("") || roles.getProject().equals("")
+					|| !roles.isBillable() || roles.getBuHead().equals("") || roles.getBuName().equals("")
+					|| roles.getHrManager().equals("")) {
 				exceptions.add("no fields should be empty");
 				logger.error("no fields should be empty");
 			}
 		} catch (DataAccessException exception) {
 			List<String> list = new ArrayList<>();
 			list.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
-					messageSource.getMessage("error.badsqlsyntax", null, Locale.getDefault()), exceptions);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
 		}
 
 		return exceptions;
 	}
 
-	@Override
-	public Role update_role(Role roles, long role_id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
+
 	public List<String> validateRole(Employee employee) {
-        
+
 		List<String> exception = new ArrayList<>();
 
-		Role role = employee.getRole();
+		Role roles = employee.getRole();
 
-		if (role.getRole() == "") {
+		if (roles.getRoles().equals("")) {
 			exception.add("Role is required for Role details");
 		}
 
-		if (role.getProject() == "") {
+		if (roles.getProject().equals("")) {
 			exception.add("Project details is required for Role details");
 		}
 
-		if (!role.isBillable()) {
+		if (!roles.isBillable()) {
 			exception.add("Billable details is required for Role details");
 		}
 
-		if (role.getHierarchical_level() == "") {
+		if (roles.getHierarchicalLevel().equals("")) {
 			exception.add("hierachical level details is required for Role details");
 		}
-		
-		if (role.getBu_name() == "") {
+
+		if (roles.getBuName().equals("")) {
 			exception.add("Business unit details is required for Role details");
 		}
 
-		if (role.getBu_head() == "") {
+		if (roles.getBuHead().equals("")) {
 			exception.add("Business unit head details is required for Role details");
 		}
-		
-		if (role.getHr_manager() == "") {
+
+		if (roles.getHrManager().equals("")) {
 			exception.add("Hr_Manager details is required for Role details");
 		}
 
 		return exception;
 	}
-
-	
 
 }

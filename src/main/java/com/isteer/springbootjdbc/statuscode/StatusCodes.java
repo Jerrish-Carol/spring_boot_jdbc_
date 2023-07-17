@@ -6,10 +6,7 @@ public enum StatusCodes {
 	    BAD_REQUEST(-1, "Bad Request"),
 	    NOT_FOUND(-2, "Not Found"),
 		CONFLICT(-3, "Conflict");
-		// UNAUTHORIZED(401, "Unauthorized"),
-	   // FORBIDDEN(403, "Forbidden"),
-	   // INTERNAL_SERVER_ERROR(500, "Internal Server Error");
-
+	
 	    private final int statusCode;
 	    private final String message;
 

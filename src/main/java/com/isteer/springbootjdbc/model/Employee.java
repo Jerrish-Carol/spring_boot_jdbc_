@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import com.isteer.springbootjdbc.model.Address;
 
 @Data
 @AllArgsConstructor
@@ -16,7 +15,7 @@ import com.isteer.springbootjdbc.model.Address;
 @Setter
 public class Employee {
 
-	private long id;
+	private long employeeId;
 
 	private String name;
 
@@ -24,19 +23,30 @@ public class Employee {
 
 	private String gender;
 
-	private Boolean is_active;
+	private Boolean isActive;
 
-	private Boolean is_account_locked;
+	private Boolean isAccountLocked;
 	
 	private String email;
 
 	private String department;
 	
-	private long role_id;
+	private long roleId;
 	
 	public List<Address> addresses = new ArrayList<>();
 	
 	public Role role;
+
+	public void setRoles(List<Role> role) {
+	
+		
+	}
+	
+	public void getRoles(Role role) {
+		
+	}
+	
+
 }
 
 

@@ -7,13 +7,13 @@ import lombok.Data;
 @Data
 public class BadSqlSyntaxException extends RuntimeException {
 
-	private long Status;
+	private long status;
 	private String message;
 	private List<String> exception;
 
-	public BadSqlSyntaxException(long Status, String message, List<String> exception) {
+	public BadSqlSyntaxException(long status, String message, List<String> exception) {
 			super();
-			this.Status = Status;
+			this.status = status;
 			this.message = message;
 			this.exception = exception;
 		}
