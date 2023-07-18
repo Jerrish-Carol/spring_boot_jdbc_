@@ -27,12 +27,13 @@ import com.isteer.springbootjdbc.response.CustomPostResponse;
 import com.isteer.springbootjdbc.service.EmployeeService;
 import com.isteer.springbootjdbc.sqlquery.SqlQueries;
 import com.isteer.springbootjdbc.statuscode.StatusCodes;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @RestController
 public class EmployeeController {
 	
-	private static Logger logger = Logger.getLogger(EmployeeController.class);
+	private static final Logger logger = LogManager.getLogger(EmployeeController.class);
 	
 	@Autowired
 	private MessageProperties messageproperties;

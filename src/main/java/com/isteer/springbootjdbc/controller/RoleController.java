@@ -2,7 +2,8 @@ package com.isteer.springbootjdbc.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.isteer.springbootjdbc.MessageProperties;
 import com.isteer.springbootjdbc.dao.RoleDao;
 import com.isteer.springbootjdbc.exception.ConstraintException;
@@ -29,7 +29,7 @@ import com.isteer.springbootjdbc.statuscode.StatusCodes;
 @RestController
 public class RoleController {
 	
-	private static Logger logger = Logger.getLogger(RoleController.class); 
+	private static final Logger logger = LogManager.getLogger(RoleController.class);
 	
 	@Autowired
 	private MessageProperties messageproperties;

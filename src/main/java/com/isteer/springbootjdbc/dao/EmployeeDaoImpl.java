@@ -6,16 +6,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.GetMapping;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +32,7 @@ import com.isteer.springbootjdbc.statuscode.StatusCodes;
 @Repository
 public class EmployeeDaoImpl implements EmployeeDao {
 
-	private static Logger logger = Logger.getLogger(EmployeeDaoImpl.class);
+	private static final Logger logger = LogManager.getLogger(EmployeeDaoImpl.class);
 	
 	@Autowired
 	private MessageProperties messageproperties;
@@ -192,7 +191,6 @@ public class EmployeeDaoImpl implements EmployeeDao {
 	}
 
 
-	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<EmployeeResult> getDataFromTables() {
 	    String sql = "Call GetAllEmployeeDetails()";
 	    return jdbcTemplate.query(sql, (rs, rowNum) -> {
@@ -212,11 +210,14 @@ public class EmployeeDaoImpl implements EmployeeDao {
 	        if (addressesJson != null) {
 	            try {
 					addresses = objectMapper.readValue(addressesJson, new TypeReference<List<EmployeeResult.Address>>() {});
-				} catch (JsonProcessingException exceptions) {
+				} 
+	           
+	            catch (JsonProcessingException exceptions) {
 					List<String> list = new ArrayList<>();
 					list.add(exceptions.getMessage());
 					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getJsonParseExceptionMessage(), list);
 				}
+	   
 	        }
 	        employee.setAddresses(addresses);
 
@@ -225,11 +226,14 @@ public class EmployeeDaoImpl implements EmployeeDao {
 	        if (rolesJson != null) {
 	            try {
 					roles = objectMapper.readValue(rolesJson, new TypeReference<List<EmployeeResult.Role>>() {});
-				} catch (JsonProcessingException exceptions) {
+				} 
+	            catch (JsonProcessingException exceptions) {
+	  
 					List<String> list = new ArrayList<>();
 					list.add(exceptions.getMessage());
 					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getJsonParseExceptionMessage(), list);
 				}
+	            
 	        }
 	        employee.setRoles(roles);
 
@@ -240,6 +244,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
 	public List<EmployeeResult> getDataFromTablesUsingId(long employeeId) {
 	    String sql = "CALL GetEmployeeDetailsById(?)";
+	  
 
 	    return jdbcTemplate.query(sql, ps -> ps.setLong(1, employeeId), rs -> {
 	        List<EmployeeResult> employeeList = new ArrayList<>();
@@ -255,17 +260,20 @@ public class EmployeeDaoImpl implements EmployeeDao {
 	            employee.setEmail(rs.getString("email"));
 	            employee.setDepartment(rs.getString("department"));
 	            employee.setRoleId(rs.getLong("roleId"));
+	        
 
 	            String addressesJson = rs.getString("addresses");
 	            List<EmployeeResult.Address> addresses = null;
 	            if (addressesJson != null) {
 	                try {
 	                    addresses = objectMapper.readValue(addressesJson, new TypeReference<List<EmployeeResult.Address>>() {});
+	                
 	                } catch (JsonProcessingException exceptions) {
 						List<String> list = new ArrayList<>();
 						list.add(exceptions.getMessage());
 						throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getJsonParseExceptionMessage(), list);
 	                }
+	               
 	            }
 	            employee.setAddresses(addresses);
 
@@ -274,15 +282,19 @@ public class EmployeeDaoImpl implements EmployeeDao {
 	            if (rolesJson != null) {
 	                try {
 	                    roles = objectMapper.readValue(rolesJson, new TypeReference<List<EmployeeResult.Role>>() {});
+	   
 	                } catch (JsonProcessingException exceptions) {
+	        
 						List<String> list = new ArrayList<>();
 						list.add(exceptions.getMessage());
 						throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getJsonParseExceptionMessage(), list);
 	                }
+	 
 	            }
 	            employee.setRoles(roles);
 
 	            employeeList.add(employee);
+	            
 	        }
 
 	        return employeeList;

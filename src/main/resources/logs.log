@@ -20,3 +20,6 @@
 2023-07-17 11:44:46 INFO  EmployeeController:73 - ID is present and data is retrieved
 2023-07-17 14:14:51 INFO  EmployeeController:73 - ID is present and data is retrieved
 2023-07-17 14:28:06 INFO  EmployeeController:141 - ID is present, details deleted
+2023-07-17 18:08:17 INFO  EmployeeController:141 - ID is present, details deleted
+2023-07-17 18:08:22 INFO  EmployeeController:141 - ID is present, details deleted
+2023-07-17 18:33:12 INFO  EmployeeController:73 - ID is present and data is retrieved

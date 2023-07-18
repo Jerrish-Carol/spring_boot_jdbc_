@@ -34,9 +34,14 @@ public class MessageProperties implements EnvironmentAware {
 	private static final String DETAILS_UPDATED_MESSAGE = "success.detailsupdated";
 	private static final String NOT_FOUND_MESSAGE = "error.notfound";
 	private static final String JSON_PROCESS_EXCEPTION_MESSAGE = "error.jsonprocessexception";
+	private static final String HTTP_MESSAGE_NOT_READABLE_EXCEPTION_MESSAGE ="error.httpMessageNotReadableException";
 
 	public MessageProperties(@Qualifier("messageSource") MessageSource messageSource) {
 		MessageProperties.messageSource = messageSource;
+	}
+	
+	public String getHttpMessageNotreadableExceptionMessage() {
+		return messageSource.getMessage(HTTP_MESSAGE_NOT_READABLE_EXCEPTION_MESSAGE, null, Locale.getDefault());
 	}
 	
 	public String getJsonParseExceptionMessage() {

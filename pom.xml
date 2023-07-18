@@ -21,7 +21,18 @@
 		    <dependency>
 		      <groupId>org.springframework.boot</groupId>
 		      <artifactId>spring-boot-starter</artifactId>
-		    </dependency>
+		      <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+		 
 		    <dependency>
 		      <groupId>org.springframework.boot</groupId>
 		      <artifactId>spring-boot-starter-test</artifactId>
@@ -34,6 +45,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 
 		<dependency>
@@ -58,11 +75,6 @@
 		    <version>3.3.6</version>
 		</dependency>
 		<dependency>
-		    <groupId>log4j</groupId>
-		    <artifactId>log4j</artifactId>
-		    <version>1.2.17</version>
-		</dependency>
-		<dependency>
 		    <groupId>javax.validation</groupId>
 		    <artifactId>validation-api</artifactId>
 		    <version>2.0.1.Final</version>
@@ -85,8 +97,7 @@
 		    <dependency>
 		        <groupId>com.fasterxml.jackson.core</groupId>
 		        <artifactId>jackson-databind</artifactId>
-		        <version>2.13.0</version>
-		    </dependency>
+		        </dependency>
 		    <dependency>
 		    	<groupId>com.isteer</groupId>
 		    	<artifactId>springbootjava8</artifactId>

@@ -6,7 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,7 +24,6 @@ import com.isteer.springbootjdbc.response.CustomDeleteResponse;
 import com.isteer.springbootjdbc.response.CustomRolePostResponse;
 import com.isteer.springbootjdbc.sqlquery.SqlQueries;
 import com.isteer.springbootjdbc.statuscode.StatusCodes;
-import com.isteer.springbootjdbc.MessageProperties;
 
 @Repository
 public class RoleDaoImpl implements RoleDao {
@@ -31,7 +31,7 @@ public class RoleDaoImpl implements RoleDao {
 	@Autowired
 	private MessageProperties messageproperties;
 
-	private static Logger logger = Logger.getLogger(RoleDaoImpl.class);
+	private static final Logger logger = LogManager.getLogger(RoleDaoImpl.class);
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -63,7 +63,7 @@ public class RoleDaoImpl implements RoleDao {
 				
 				List<String> exceptions = new ArrayList<>();
 				exceptions.add(nullexceptions.getMessage());
-				throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(), messageproperties.getDuplicateKeyMessage(), exceptions);
+				throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(), messageproperties.getConstraintsInvalidMessage(), exceptions);
 			
 			
 		} catch (DataAccessException exception) {

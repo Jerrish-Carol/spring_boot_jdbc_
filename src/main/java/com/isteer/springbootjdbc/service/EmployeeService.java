@@ -58,14 +58,6 @@ public class EmployeeService {
 		            }
 				}
 			}
-//			else if(employee.getAddresses().size() < aDAO.getAddressById(id).size()) {
-//				for (int i = 0; i < employee.getAddresses().size(); i++) {
-//		            Address address = employee.getAddresses().get(i);
-//		            if(!aDAO.getAddressById(id).contains(address.getAddressId())) {
-//		            	aDAO.insert(address, employee.getEmployeeId());
-//		            }
-//				}
-//			}
 			else {
 				aDAO.update(employee.getAddresses(), employee.getEmployeeId());
 			}
@@ -80,7 +72,6 @@ public class EmployeeService {
 		}
 
 		return new CustomPostResponse(StatusCodes.SUCCESS.getStatusCode(),messageproperties.getDetailsUpdatedMessage(),
-				/*messageSource.getMessage(messageproperties.getDetailsUpdatedMessage(), null, Locale.getDefault()),*/
 				eDAO.getDataFromTablesUsingId(id));
 
 	}
