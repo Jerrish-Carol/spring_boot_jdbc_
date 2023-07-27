@@ -28,10 +28,10 @@ public class AddressDaoImpl implements AddressDao {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
-	
+
 	@Autowired
 	private MessageProperties messageproperties;
-	
+
 	public Address insert(Address address, long id) {
 
 		try {
@@ -53,18 +53,18 @@ public class AddressDaoImpl implements AddressDao {
 			}, keyHolder) == 1) {
 				address.setAddressId(keyHolder.getKey().longValue());
 			}
-		}
-			catch(NullPointerException nullexceptions) {
-				
-				List<String> exceptions = new ArrayList<>();
-				exceptions.add(nullexceptions.getMessage());
-				throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(), messageproperties.getDuplicateKeyMessage(), exceptions);
-			
-			
+		} catch (NullPointerException nullexceptions) {
+
+			List<String> exceptions = new ArrayList<>();
+			exceptions.add(nullexceptions.getMessage());
+			throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(),
+					messageproperties.getDuplicateKeyMessage(), exceptions);
+
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),exceptions);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
 		}
 
 		return address;
@@ -73,83 +73,98 @@ public class AddressDaoImpl implements AddressDao {
 
 	public CustomPostResponse save(List<Address> addresses, Long id) {
 
-		jdbcTemplate.batchUpdate(SqlQueries.INSERT_ADDRESS_QUERY, new BatchPreparedStatementSetter() {
+		try {
 
-			@Override
-			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				Address address = addresses.get(i);
-				ps.setLong(1, address.getAddressId());
-				ps.setLong(2, id);
-				ps.setString(3, address.getStreet());
-				ps.setString(4, address.getCity());
-				ps.setString(5, address.getState());
-				ps.setString(6, address.getCountry());
+			jdbcTemplate.batchUpdate(SqlQueries.INSERT_ADDRESS_QUERY, new BatchPreparedStatementSetter() {
 
-			}
+				@Override
+				public void setValues(PreparedStatement ps, int i) throws SQLException {
+					Address address = addresses.get(i);
+					ps.setLong(1, address.getAddressId());
+					ps.setLong(2, id);
+					ps.setString(3, address.getStreet());
+					ps.setString(4, address.getCity());
+					ps.setString(5, address.getState());
+					ps.setString(6, address.getCountry());
 
-			@Override
-			public int getBatchSize() {
-				return addresses.size();
-			}
+				}
 
-		});
-		return null;
+				@Override
+				public int getBatchSize() {
+					return addresses.size();
+				}
+
+			});
+			return null;
+		} catch (DataAccessException exception) {
+			List<String> exceptions = new ArrayList<>();
+			exceptions.add(exception.getMessage());
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+		}
 	}
 
 	public CustomPostResponse update(List<Address> addresses, Long id) {
+		try {
+			jdbcTemplate.batchUpdate(SqlQueries.UPDATE_ADDRESS_BY_ID_QUERY, new BatchPreparedStatementSetter() {
 
-		jdbcTemplate.batchUpdate(SqlQueries.UPDATE_ADDRESS_BY_ID_QUERY, new BatchPreparedStatementSetter() {
+				@Override
+				public void setValues(PreparedStatement ps, int i) throws SQLException {
+					Address address = addresses.get(i);
+					ps.setLong(1, id);
+					ps.setString(2, address.getStreet());
+					ps.setString(3, address.getCity());
+					ps.setString(4, address.getState());
+					ps.setString(5, address.getCountry());
+					ps.setLong(6, address.getAddressId());
 
-			@Override
-			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				Address address = addresses.get(i);
-				ps.setLong(1,id);
-				ps.setString(2, address.getStreet());
-				ps.setString(3, address.getCity());
-				ps.setString(4, address.getState());
-				ps.setString(5, address.getCountry());
-				ps.setLong(6, address.getAddressId());
+				}
 
-			}
+				@Override
+				public int getBatchSize() {
 
-			@Override
-			public int getBatchSize() {
+					return addresses.size();
+				}
 
-				return addresses.size();
-			}
-			
+			});
+			return null;
+		} catch (DataAccessException exception) {
+			List<String> exceptions = new ArrayList<>();
+			exceptions.add(exception.getMessage());
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+		}
 
-		});
-		return null;
 	}
-	
+
+
 	public List<String> validateAddresses(Employee employee) {
-        List<Address> addresses = employee.getAddresses();
+		List<Address> addresses = employee.getAddresses();
 
-        List<String> exception = new ArrayList<>();
-        
-        for (int i = 0; i < addresses.size(); i++) {
-            Address address = addresses.get(i);
+		List<String> exception = new ArrayList<>();
 
-            if (address.getStreet().equals("")) {
-            	exception.add("Street is required for Address " + (i + 1));
-            }
+		for (int i = 0; i < addresses.size(); i++) {
+			Address address = addresses.get(i);
 
-            if (address.getCity().equals("")) {
-            	exception.add("City is required for Address " + (i + 1));
-            }
-            
-            if (address.getState().equals("")) {
-            	exception.add("State is required for Address " + (i + 1));
-            }
-            
-            if (address.getCountry().equals("")) {
-            	exception.add("Country is required for Address " + (i + 1));
-            }
-        }
+			if (address.getStreet().equals("")) {
+				exception.add("Street is required for Address " + (i + 1));
+			}
+
+			if (address.getCity().equals("")) {
+				exception.add("City is required for Address " + (i + 1));
+			}
+
+			if (address.getState().equals("")) {
+				exception.add("State is required for Address " + (i + 1));
+			}
+
+			if (address.getCountry().equals("")) {
+				exception.add("Country is required for Address " + (i + 1));
+			}
+		}
 		return exception;
-    }
-	
+	}
+
 	@Override
 	public List<Address> getAll() {
 
@@ -174,8 +189,8 @@ public class AddressDaoImpl implements AddressDao {
 				} catch (DataAccessException exception) {
 					List<String> exceptions = new ArrayList<>();
 					exceptions.add(exception.getMessage());
-					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),
-							exceptions);
+					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+							messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
 				}
 				return addresses;
 			}
@@ -186,13 +201,13 @@ public class AddressDaoImpl implements AddressDao {
 
 	@Override
 	public List<Address> getAddressById(long id) {
-		
-		return jdbcTemplate.query(SqlQueries.GET_ADDRESS_BY_ID_QUERY, new ResultSetExtractor<List<Address>>() {
 
-			public List<Address> extractData(ResultSet rs) throws SQLException {
-				List<Address> addresses = new ArrayList<>();
+		try {
 
-				try {
+			return jdbcTemplate.query(SqlQueries.GET_ADDRESS_BY_ID_QUERY, new ResultSetExtractor<List<Address>>() {
+
+				public List<Address> extractData(ResultSet rs) throws SQLException {
+					List<Address> addresses = new ArrayList<>();
 
 					while (rs.next()) {
 						Address address = new Address();
@@ -203,18 +218,19 @@ public class AddressDaoImpl implements AddressDao {
 						address.setState(rs.getString(VariableDeclaration.STATE));
 						address.setCountry(rs.getString(VariableDeclaration.COUNTRY));
 
-
 					}
-				} catch (DataAccessException exception) {
-					List<String> exceptions = new ArrayList<>();
-					exceptions.add(exception.getMessage());
-					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),
-							exceptions);
-				}
-				return addresses;
-			}
 
-		},id);
+					return addresses;
+				}
+
+			}, id);
+
+		} catch (DataAccessException exception) {
+			List<String> exceptions = new ArrayList<>();
+			exceptions.add(exception.getMessage());
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+		}
 
 	}
 }

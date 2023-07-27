@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	
+	<Properties>
+        <Property name="log.level">${level}</Property>
+    </Properties>
+    
+    <Appenders>
+        <Console name="AUDITCONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </Console>
+
+        <RollingFile name="AUDIT" fileName="audit.log"
+                     filePattern="audit-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" />
+                <TimeBasedTriggeringPolicy interval="1" />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+  
+    <Loggers>
+		<Loggers>
+        <Root level="${log.level}">
+            <AppenderRef ref="AUDIT" />
+        </Root>
+    </Loggers>
+        <Root level="debug">
+            <AppenderRef ref="AUDITCONSOLE" />
+            <AppenderRef ref="RollingFileAppender" />
+        </Root>
+    </Loggers>
+</Configuration>

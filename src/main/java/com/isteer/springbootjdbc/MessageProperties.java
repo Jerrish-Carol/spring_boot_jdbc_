@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 public class MessageProperties implements EnvironmentAware {
 	
- public static MessageSource messageSource;
+	public static MessageSource messageSource;
 
 	public static Environment environment;
 
@@ -37,7 +37,7 @@ public class MessageProperties implements EnvironmentAware {
 	private static final String HTTP_MESSAGE_NOT_READABLE_EXCEPTION_MESSAGE ="error.httpMessageNotReadableException";
 
 	public MessageProperties(@Qualifier("messageSource") MessageSource messageSource) {
-		MessageProperties.messageSource = messageSource;
+		this.messageSource = messageSource;
 	}
 	
 	public String getHttpMessageNotreadableExceptionMessage() {
@@ -93,6 +93,6 @@ public class MessageProperties implements EnvironmentAware {
 	}
 
 	public String getNotFoundMessage() {
-		return messageSource.getMessage(NOT_FOUND_MESSAGE, null, Locale.getDefault());
+		return messageSource.getMessage(NOT_FOUND_MESSAGE, null, Locale.ENGLISH);
 	}
 }

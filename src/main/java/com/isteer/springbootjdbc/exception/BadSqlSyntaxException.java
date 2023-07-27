@@ -7,9 +7,9 @@ import lombok.Data;
 @Data
 public class BadSqlSyntaxException extends RuntimeException {
 
-	private long status;
-	private String message;
-	private List<String> exception;
+	private static long status;
+	private final String message;
+	private final List<String> exception;
 
 	public BadSqlSyntaxException(long status, String message, List<String> exception) {
 			super();

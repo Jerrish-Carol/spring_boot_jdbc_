@@ -33,7 +33,7 @@ import com.isteer.springbootjdbc.statuscode.StatusCodes;
 public class EmployeeDaoImpl implements EmployeeDao {
 
 	private static final Logger logger = LogManager.getLogger(EmployeeDaoImpl.class);
-	
+
 	@Autowired
 	private MessageProperties messageproperties;
 
@@ -41,7 +41,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 	private JdbcTemplate jdbcTemplate; // spring will create this and put in Ioc Container
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
-	
+
 	public CustomPostResponse save(Employee employee) {
 
 		GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
@@ -63,21 +63,24 @@ public class EmployeeDaoImpl implements EmployeeDao {
 			}, keyHolder) == 1) {
 				employee.setEmployeeId(keyHolder.getKey().longValue());
 			}
-		} catch(NullPointerException nullexceptions) {
-			
+		} catch (NullPointerException nullexceptions) {
+
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(nullexceptions.getMessage());
-			throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(), messageproperties.getDuplicateKeyMessage(), exceptions);
-		
+			throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(),
+					messageproperties.getDuplicateKeyMessage(), exceptions);
+
 		} catch (DuplicateKeyException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(), messageproperties.getDuplicateKeyMessage(),exceptions);
+			throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(),
+					messageproperties.getDuplicateKeyMessage(), exceptions);
 
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),exceptions);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
 
 		}
 
@@ -115,24 +118,28 @@ public class EmployeeDaoImpl implements EmployeeDao {
 						} catch (SQLException exception) {
 							List<String> exceptions = new ArrayList<>();
 							exceptions.add(exception.getMessage());
-							throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),exceptions);
+							throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+									messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
 						}
 						return employee;
 					}
 				}, employeeId);
 
-				return new CustomPostResponse(StatusCodes.SUCCESS.getStatusCode(), messageproperties.getDetailsUpdatedMessage(),getDataFromTablesUsingId(employeeId));
+				return new CustomPostResponse(StatusCodes.SUCCESS.getStatusCode(),
+						messageproperties.getDetailsUpdatedMessage(), getDataFromTablesUsingId(employeeId));
 
 			} else {
 				List<String> exception = new ArrayList<>();
 				exception.add("Provide all details required");
-				throw new DetailsNotProvidedException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getDetailsNotProvidedMessage(), exception);
+				throw new DetailsNotProvidedException(StatusCodes.BAD_REQUEST.getStatusCode(),
+						messageproperties.getDetailsNotProvidedMessage(), exception);
 			}
 
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),exceptions);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
 
 		}
 
@@ -148,9 +155,11 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
 		}
-		return new CustomDeleteResponse(StatusCodes.SUCCESS.getStatusCode(), messageproperties.getDetailsDeletedMessage(),statement);
+		return new CustomDeleteResponse(StatusCodes.SUCCESS.getStatusCode(),
+				messageproperties.getDetailsDeletedMessage(), statement);
 	}
 
 	public List<String> validateEmployee(Employee employee) {
@@ -186,14 +195,85 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		} catch (DataAccessException exceptions) {
 			List<String> list = new ArrayList<>();
 			list.add(exceptions.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(), list);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageproperties.getBadSqlSyntaxErrorMessage(), list);
 		}
 	}
 
-
 	public List<EmployeeResult> getDataFromTables() {
-	    String sql = "Call GetAllEmployeeDetails()";
-	    return jdbcTemplate.query(sql, (rs, rowNum) -> {
+
+		try {
+
+			String sql = "Call GetAllEmployeeDetails()";
+			return jdbcTemplate.query(sql, (rs, rowNum) -> {
+				EmployeeResult employee = new EmployeeResult();
+				employee.setEmployeeId(rs.getLong("employeeId"));
+				employee.setName(rs.getString("name"));
+				employee.setDob(rs.getString("dob"));
+				employee.setGender(rs.getString("gender"));
+				employee.setActive(rs.getBoolean("isActive"));
+				employee.setAccountLocked(rs.getBoolean("isAccountLocked"));
+				employee.setEmail(rs.getString("email"));
+				employee.setDepartment(rs.getString("department"));
+				employee.setRoleId(rs.getLong(VariableDeclaration.ROLE_ID));
+
+				String addressesJson = rs.getString("addresses");
+				List<EmployeeResult.Address> addresses = null;
+				if (addressesJson != null) {
+					try {
+						addresses = objectMapper.readValue(addressesJson,
+								new TypeReference<List<EmployeeResult.Address>>() {
+								});
+					}
+
+					catch (JsonProcessingException exceptions) {
+						List<String> list = new ArrayList<>();
+						list.add(exceptions.getMessage());
+						throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+								messageproperties.getJsonParseExceptionMessage(), list);
+					}
+
+				}
+				employee.setAddresses(addresses);
+
+				String rolesJson = rs.getString("roles");
+				List<EmployeeResult.Role> roles = null;
+				if (rolesJson != null) {
+					try {
+						roles = objectMapper.readValue(rolesJson, new TypeReference<List<EmployeeResult.Role>>() {
+						});
+					} catch (JsonProcessingException exceptions) {
+
+						List<String> list = new ArrayList<>();
+						list.add(exceptions.getMessage());
+						throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+								messageproperties.getJsonParseExceptionMessage(), list);
+					}
+
+				}
+				employee.setRoles(roles);
+
+				return employee;
+			});
+		} catch (DataAccessException exception) {
+			List<String> exceptions = new ArrayList<>();
+			exceptions.add(exception.getMessage());
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+		}
+
+	}
+	
+	public List<EmployeeResult> getDataFromTablesUsingId(long employeeId) {
+	    String sql = "CALL GetEmployeeDetailsById(?)";
+	  
+	    return jdbcTemplate.query(sql, ps -> ps.setLong(1, employeeId), this::mapEmployeeResult);
+	}
+
+	private List<EmployeeResult> mapEmployeeResult(ResultSet rs) throws SQLException {
+	    List<EmployeeResult> employeeList = new ArrayList<>();
+
+	    while (rs.next()) {
 	        EmployeeResult employee = new EmployeeResult();
 	        employee.setEmployeeId(rs.getLong("employeeId"));
 	        employee.setName(rs.getString("name"));
@@ -203,106 +283,47 @@ public class EmployeeDaoImpl implements EmployeeDao {
 	        employee.setAccountLocked(rs.getBoolean("isAccountLocked"));
 	        employee.setEmail(rs.getString("email"));
 	        employee.setDepartment(rs.getString("department"));
-	        employee.setRoleId(rs.getLong(VariableDeclaration.ROLE_ID));
+	        employee.setRoleId(rs.getLong("roleId"));
 
 	        String addressesJson = rs.getString("addresses");
-	        List<EmployeeResult.Address> addresses = null;
-	        if (addressesJson != null) {
-	            try {
-					addresses = objectMapper.readValue(addressesJson, new TypeReference<List<EmployeeResult.Address>>() {});
-				} 
-	           
-	            catch (JsonProcessingException exceptions) {
-					List<String> list = new ArrayList<>();
-					list.add(exceptions.getMessage());
-					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getJsonParseExceptionMessage(), list);
-				}
-	   
-	        }
+	        List<EmployeeResult.Address> addresses = convertJsonToAddressList(addressesJson);
 	        employee.setAddresses(addresses);
 
 	        String rolesJson = rs.getString("roles");
-	        List<EmployeeResult.Role> roles = null;
-	        if (rolesJson != null) {
-	            try {
-					roles = objectMapper.readValue(rolesJson, new TypeReference<List<EmployeeResult.Role>>() {});
-				} 
-	            catch (JsonProcessingException exceptions) {
-	  
-					List<String> list = new ArrayList<>();
-					list.add(exceptions.getMessage());
-					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getJsonParseExceptionMessage(), list);
-				}
-	            
-	        }
+	        List<EmployeeResult.Role> roles = convertJsonToRoleList(rolesJson);
 	        employee.setRoles(roles);
 
-	        return employee;
-	    });
+	        employeeList.add(employee);
+	    }
 
+	    return employeeList;
 	}
 
-	public List<EmployeeResult> getDataFromTablesUsingId(long employeeId) {
-	    String sql = "CALL GetEmployeeDetailsById(?)";
-	  
-
-	    return jdbcTemplate.query(sql, ps -> ps.setLong(1, employeeId), rs -> {
-	        List<EmployeeResult> employeeList = new ArrayList<>();
-
-	        while (rs.next()) {
-	            EmployeeResult employee = new EmployeeResult();
-	            employee.setEmployeeId(rs.getLong("employeeId"));
-	            employee.setName(rs.getString("name"));
-	            employee.setDob(rs.getString("dob"));
-	            employee.setGender(rs.getString("gender"));
-	            employee.setActive(rs.getBoolean("isActive"));
-	            employee.setAccountLocked(rs.getBoolean("isAccountLocked"));
-	            employee.setEmail(rs.getString("email"));
-	            employee.setDepartment(rs.getString("department"));
-	            employee.setRoleId(rs.getLong("roleId"));
-	        
-
-	            String addressesJson = rs.getString("addresses");
-	            List<EmployeeResult.Address> addresses = null;
-	            if (addressesJson != null) {
-	                try {
-	                    addresses = objectMapper.readValue(addressesJson, new TypeReference<List<EmployeeResult.Address>>() {});
-	                
-	                } catch (JsonProcessingException exceptions) {
-						List<String> list = new ArrayList<>();
-						list.add(exceptions.getMessage());
-						throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getJsonParseExceptionMessage(), list);
-	                }
-	               
-	            }
-	            employee.setAddresses(addresses);
-
-	            String rolesJson = rs.getString("roles");
-	            List<EmployeeResult.Role> roles = null;
-	            if (rolesJson != null) {
-	                try {
-	                    roles = objectMapper.readValue(rolesJson, new TypeReference<List<EmployeeResult.Role>>() {});
-	   
-	                } catch (JsonProcessingException exceptions) {
-	        
-						List<String> list = new ArrayList<>();
-						list.add(exceptions.getMessage());
-						throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getJsonParseExceptionMessage(), list);
-	                }
-	 
-	            }
-	            employee.setRoles(roles);
-
-	            employeeList.add(employee);
-	            
+	private List<EmployeeResult.Address> convertJsonToAddressList(String addressesJson) {
+	    if (addressesJson != null) {
+	        try {
+	            return objectMapper.readValue(addressesJson, new TypeReference<List<EmployeeResult.Address>>() {});
+	        } catch (JsonProcessingException exceptions) {
+	            List<String> list = new ArrayList<>();
+	            list.add(exceptions.getMessage());
+	            throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getJsonParseExceptionMessage(), list);
 	        }
-
-	        return employeeList;
-	    });
+	    }
+	    return null;
 	}
-	
+
+	private List<EmployeeResult.Role> convertJsonToRoleList(String rolesJson) {
+	    if (rolesJson != null) {
+	        try {
+	            return objectMapper.readValue(rolesJson, new TypeReference<List<EmployeeResult.Role>>() {});
+	        } catch (JsonProcessingException exceptions) {
+	            List<String> list = new ArrayList<>();
+	            list.add(exceptions.getMessage());
+	            throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getJsonParseExceptionMessage(), list);
+	        }
+	    }
+	    return null;
+	}
+
+
 }
-
-	
-
-

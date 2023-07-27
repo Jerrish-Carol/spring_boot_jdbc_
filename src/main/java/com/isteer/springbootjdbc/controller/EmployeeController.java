@@ -1,6 +1,7 @@
 package com.isteer.springbootjdbc.controller;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
@@ -27,13 +28,15 @@ import com.isteer.springbootjdbc.response.CustomPostResponse;
 import com.isteer.springbootjdbc.service.EmployeeService;
 import com.isteer.springbootjdbc.sqlquery.SqlQueries;
 import com.isteer.springbootjdbc.statuscode.StatusCodes;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 public class EmployeeController {
 	
-	private static final Logger logger = LogManager.getLogger(EmployeeController.class);
+	private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
+	
+	private static final Logger auditlogger = LoggerFactory.getLogger(EmployeeController.class);
 	
 	@Autowired
 	private MessageProperties messageproperties;
@@ -54,9 +57,10 @@ public class EmployeeController {
 	private JdbcTemplate jdbcTemplate;
 	
 
-	@GetMapping(value="/employees",produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value="/employees", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<EmployeeResult>> getData() {
 		List<EmployeeResult> combinedData = eDAO.getDataFromTables();
+		auditlogger.info("Data retrieved");
 		return ResponseEntity.ok(combinedData);
 	}
 	
@@ -67,11 +71,11 @@ public class EmployeeController {
 		if (jdbcTemplate.queryForObject(SqlQueries.CHECK_ID_IS_PRESENT_QUERY, Long.class, employeeId) == 0) {
 			List<String> exception = new ArrayList<>();
 			exception.add("The details are not present for id " + employeeId);
-			logger.error("ID is not present.");
-
+			auditlogger.warn("Data is not present and so not retrieved for ID : {0} Status Code :  {1} Mesage : {2}" ,employeeId,StatusCodes.NOT_FOUND.getStatusCode(),messageproperties.getNotFoundMessage());
 			throw new DetailsNotFoundException(StatusCodes.NOT_FOUND.getStatusCode(), messageproperties.getNotFoundMessage(), exception);
 		} else {
 			logger.info("ID is present and data is retrieved");
+			auditlogger.info("Data retrieved for ID : " + employeeId);
 
 			List<EmployeeResult> combinedData = eDAO.getDataFromTablesUsingId(employeeId);
 			return ResponseEntity.ok(combinedData);
@@ -86,12 +90,15 @@ public class EmployeeController {
 		List<String> exception = aDAO.validateAddresses(employee);
 
 		if (exceptions.isEmpty() && exception.isEmpty()) {
+			auditlogger.info("No validation issues found in :" + employee.getName()+ " details.");
 			return new ResponseEntity<>(eService.saveEmployeeWithAddresses(employee),
 					HttpStatus.CREATED);
 		} else if (!exception.isEmpty() && exceptions.isEmpty()) {
+			auditlogger.warn("Data is not saved for : " + employee.getName()+ " Status Code :"+StatusCodes.NOT_FOUND.getStatusCode()+" Mesage :"+ messageproperties.getDetailsNotProvidedMessage());
 			throw new DetailsNotFoundException(StatusCodes.NOT_FOUND.getStatusCode(), messageproperties.getDetailsNotProvidedMessage(), exception);
 		} else {
 			exceptions.addAll(exception);
+			auditlogger.warn("Data is not saved for : " + employee.getName()+ " Status Code :"+StatusCodes.BAD_REQUEST.getStatusCode()+" Mesage :"+ messageproperties.getConstraintsInvalidMessage());
 			throw new ConstraintException(StatusCodes.BAD_REQUEST.getStatusCode(),messageproperties.getConstraintsInvalidMessage(),exceptions);
 		}
 
@@ -116,14 +123,16 @@ public class EmployeeController {
 			exception.addAll(roleexception);
 
 			if (exception.isEmpty()) {
+				auditlogger.info("Data is not saved for : " + employee.getName() + " Status Code :"+StatusCodes.BAD_REQUEST.getStatusCode()+" Mesage :"+ messageproperties.getConstraintsInvalidMessage());
 				return new ResponseEntity<>(
 						eService.updateAndRetrieveEmployeesWithGroupBy(employee, employeeId), HttpStatus.OK);
 			} else {
-
+				auditlogger.warn("Data is not saved for : " + employee.getName()+ " Status Code :"+StatusCodes.BAD_REQUEST.getStatusCode()+" Mesage :"+ messageproperties.getDetailsNotProvidedMessage());
 				throw new ConstraintException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getDetailsNotProvidedMessage(), exception);
 			}
 			
 		} else {
+			auditlogger.warn("Data is not saved for : " + employee.getName()+ " Status Code :"+StatusCodes.NOT_FOUND.getStatusCode()+" Mesage :"+ messageproperties.getNotFoundMessage());
 			return new ResponseEntity<>(eDAO.update(employee, employeeId), HttpStatus.NOT_FOUND);
 		}
 	}
@@ -136,15 +145,16 @@ public class EmployeeController {
 			List<String> exception = new ArrayList<>();
 			exception.add("Not data present to delete");
 			logger.error("ID is not present, nothing to delete");
+			auditlogger.warn("Data is not deleted for ID : " + employeeId + " Status Code :"+StatusCodes.NOT_FOUND.getStatusCode()+" Mesage :"+ messageproperties.getNoContentToDeleteMessage());
 			throw new DetailsNotFoundException(StatusCodes.NOT_FOUND.getStatusCode(), messageproperties.getNoContentToDeleteMessage(), exception);
 
 		} else {
 			logger.info("ID is present, details deleted");
+			auditlogger.info("Data is deleted for ID : " + employeeId + " Status Code :"+StatusCodes.SUCCESS.getStatusCode()+" Mesage :"+ messageproperties.getDetailsUpdatedMessage());
 			return new ResponseEntity<>(eDAO.delete(employeeId), HttpStatus.OK);
 		}
 
 	}
-
 	 
 
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,8 @@ public class RoleController {
 	
 	private static final Logger logger = LogManager.getLogger(RoleController.class);
 	
+	private static final Logger auditlogger = LogManager.getLogger(RoleController.class);
+	
 	@Autowired
 	private MessageProperties messageproperties;
 	
@@ -45,6 +48,7 @@ public class RoleController {
 	
 	@GetMapping("/role")
 	public ResponseEntity<List<Role>> getAllRoles(){
+		auditlogger.info("Data retrieved");
 		return new ResponseEntity<>(rDAO.getAll(),HttpStatus.OK);
 		
 	}
@@ -54,10 +58,11 @@ public class RoleController {
 		if (jdbcTemplate.queryForObject(SqlQueries.CHECK_ROLE_ID_IS_PRESENT_QUERY, Long.class, roleId) == 0) {
 			List<String> exception = new ArrayList<>();
 			exception.add("The details are not present for the role id " + roleId);
-			logger.error("Role ID is not present.");
+			auditlogger.warn("Data is not present and so not retrieved for ID : " + roleId + " Status Code :" +StatusCodes.NOT_FOUND.getStatusCode()+" Mesage :"+ messageproperties.getNotFoundMessage());
 
 			throw new DetailsNotFoundException(StatusCodes.NOT_FOUND.getStatusCode(), messageproperties.getNotFoundMessage(), exception);
 		} else {
+			auditlogger.warn("Data is present and so retrieved for ID : " + roleId + " Status Code :" +StatusCodes.SUCCESS.getStatusCode()+" Mesage :"+ messageproperties.getDetailsDisplayedMessage());
 			return new ResponseEntity<>(rDAO.getById(roleId), HttpStatus.OK);
 		}
 
@@ -67,9 +72,11 @@ public class RoleController {
 	public ResponseEntity<CustomRolePostResponse> saveRole(@RequestBody Role role){
 		List<String> exceptions = rDAO.validateRoles(role);
 		if (exceptions.isEmpty()) {
+			auditlogger.info("No validation issues found in details.");
 			return new ResponseEntity<>(rDAO.save(role),HttpStatus.CREATED);
 		}
 		else {
+			auditlogger.warn("Data is not saved for role provided " + "Status Code :" + StatusCodes.BAD_REQUEST.getStatusCode() + " Mesage :" + messageproperties.getConstraintsInvalidMessage());
 			throw new ConstraintException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getConstraintsInvalidMessage(), exceptions);
 		}
 		
@@ -83,11 +90,14 @@ public class RoleController {
 			List<String> exceptions = rDAO.validateRoles(role);
 
 			if (exceptions.isEmpty()) {
+				auditlogger.info("No validation issues found in details.");
 				return new ResponseEntity<>(rDAO.update(role, roleId), HttpStatus.OK);
 			} else {
+				auditlogger.warn("Data is not saved for role provided " + "Status Code :" + StatusCodes.BAD_REQUEST.getStatusCode() + " Mesage :" + messageproperties.getConstraintsInvalidMessage());
 				throw new ConstraintException(StatusCodes.BAD_REQUEST.getStatusCode(),messageproperties.getDetailsNotProvidedMessage(), exceptions);
 			}
 		} else {
+			auditlogger.warn("Data is  " + " Status Code :"+StatusCodes.NOT_FOUND.getStatusCode()+" Mesage :"+ messageproperties.getNoContentToDeleteMessage());
 			return new ResponseEntity<>(rDAO.update(role, roleId), HttpStatus.NOT_FOUND);
 		}
 
@@ -100,12 +110,12 @@ public class RoleController {
 			
 			List<String> exception = new ArrayList<>();
 			exception.add("Not data present to delete");
-			logger.error("ID is not present, nothing to delete");
+			auditlogger.warn("Data is not deleted for ID : " + roleId + " Status Code :"+StatusCodes.NOT_FOUND.getStatusCode()+" Mesage :"+ messageproperties.getNoContentToDeleteMessage());
 			throw new DetailsNotFoundException(StatusCodes.NOT_FOUND.getStatusCode(), messageproperties.getNoContentToDeleteMessage(), exception);
 		
 		}
 		else {
-			logger.info("ID is present, details deleted");
+			auditlogger.warn("Data is deleted for ID : " + roleId + " Status Code :"+StatusCodes.SUCCESS.getStatusCode()+" Mesage :"+ messageproperties.getDetailsDeletedMessage());
 			return new ResponseEntity<>(rDAO.delete(roleId),HttpStatus.OK);
 		}
 		

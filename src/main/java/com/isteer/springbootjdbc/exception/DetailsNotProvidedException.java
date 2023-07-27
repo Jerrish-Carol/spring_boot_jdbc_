@@ -7,9 +7,9 @@ import lombok.Data;
 @Data
 public class DetailsNotProvidedException extends RuntimeException {
 
-	private long status;
-	private String message;
-	private List<String> exception;
+	private final long status;
+	private final String message;
+	private final List<String> exception;
 
 	public DetailsNotProvidedException(long status, String message, List<String> exception) {
 		super();
