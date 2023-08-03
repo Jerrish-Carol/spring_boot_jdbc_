@@ -6,6 +6,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -13,8 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-
-import com.isteer.springbootjdbc.MessageProperties;
+import com.isteer.springbootjdbc.MessageService;
 import com.isteer.springbootjdbc.exception.SqlSyntaxException;
 import com.isteer.springbootjdbc.model.Address;
 import com.isteer.springbootjdbc.model.Employee;
@@ -28,9 +30,16 @@ public class AddressDaoImpl implements AddressDao {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
-
+	
 	@Autowired
-	private MessageProperties messageproperties;
+	private MessageService messageservice;
+	
+	private static final Logger auditlogger = LogManager.getLogger(AddressDaoImpl.class);
+	
+	private static String wLog = "Id: {} Status Code: {} Message: {} Exception: {} Layer: Address DAO layer";
+	
+	private static String iLog = "Id: {} Status Code: {} Message: {} Layer: Address DAO layer";
+	
 
 	public Address insert(Address address, long id) {
 
@@ -57,16 +66,20 @@ public class AddressDaoImpl implements AddressDao {
 
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(nullexceptions.getMessage());
-			throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(),
-					messageproperties.getDuplicateKeyMessage(), exceptions);
+			auditlogger.warn(wLog, address.getAddressId(),StatusCodes.CONFLICT.getStatusCode(), messageservice.getDuplicateKeyMessage(), exceptions);
+			throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(), messageservice.getDuplicateKeyMessage(), exceptions);
 
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
+			auditlogger.warn(wLog, address.getAddressId(),StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
-					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+					messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 		}
 
+		auditlogger.info(iLog, address.getAddressId(),StatusCodes.SUCCESS.getStatusCode(),
+				messageservice.getDetailsSavedMessage());
 		return address;
 
 	}
@@ -95,12 +108,16 @@ public class AddressDaoImpl implements AddressDao {
 				}
 
 			});
+			auditlogger.info(iLog, id ,StatusCodes.SUCCESS.getStatusCode(),
+					messageservice.getDetailsSavedMessage());
 			return null;
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
+			auditlogger.warn(wLog, id ,StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
-					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+					messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 		}
 	}
 
@@ -108,6 +125,7 @@ public class AddressDaoImpl implements AddressDao {
 		try {
 			jdbcTemplate.batchUpdate(SqlQueries.UPDATE_ADDRESS_BY_ID_QUERY, new BatchPreparedStatementSetter() {
 
+			
 				@Override
 				public void setValues(PreparedStatement ps, int i) throws SQLException {
 					Address address = addresses.get(i);
@@ -127,12 +145,16 @@ public class AddressDaoImpl implements AddressDao {
 				}
 
 			});
+			auditlogger.info(iLog, id ,StatusCodes.SUCCESS.getStatusCode(),
+					messageservice.getDetailsUpdatedMessage());
 			return null;
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
+			auditlogger.warn(wLog, id ,StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
-					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+					messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 		}
 
 	}
@@ -189,9 +211,13 @@ public class AddressDaoImpl implements AddressDao {
 				} catch (DataAccessException exception) {
 					List<String> exceptions = new ArrayList<>();
 					exceptions.add(exception.getMessage());
+					auditlogger.warn(wLog, "All Addresses" ,StatusCodes.BAD_REQUEST.getStatusCode(),
+							messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
-							messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+							messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 				}
+				auditlogger.info(iLog, "All Addresses",StatusCodes.SUCCESS.getStatusCode(),
+						messageservice.getDetailsDisplayedMessage());
 				return addresses;
 			}
 
@@ -220,6 +246,8 @@ public class AddressDaoImpl implements AddressDao {
 
 					}
 
+					auditlogger.info(iLog, id ,StatusCodes.SUCCESS.getStatusCode(),
+							messageservice.getDetailsDisplayedMessage());
 					return addresses;
 				}
 
@@ -228,8 +256,10 @@ public class AddressDaoImpl implements AddressDao {
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
+			auditlogger.warn(wLog,id,StatusCodes.BAD_REQUEST.getStatusCode(),
+					messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
-					messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+					messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 		}
 
 	}

@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.Data;
 
+@SuppressWarnings("serial")
 @Data
 public class SqlSyntaxException extends RuntimeException{
 	//if we don't extend exception or runtime exception then -> Type mismatch: cannot convert from Class<SqlSyntaxException> to Class<? extends Throwable>

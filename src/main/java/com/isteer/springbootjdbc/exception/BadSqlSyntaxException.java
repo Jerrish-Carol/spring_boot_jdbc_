@@ -3,11 +3,14 @@ package com.isteer.springbootjdbc.exception;
 import java.util.List;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@SuppressWarnings("serial")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class BadSqlSyntaxException extends RuntimeException {
 
-	private static long status;
+	private long status;
 	private final String message;
 	private final List<String> exception;
 

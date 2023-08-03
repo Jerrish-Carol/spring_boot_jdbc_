@@ -27,6 +27,8 @@ public class VariableDeclaration {
 
 	public static final String DEPARTMENT = "DEPARTMENT";
 	
+	public static final String NAME = "NAME";
+	
 	public static final String PROJECT = "PROJECT";
 	
 	public static final String BILLABLE = "BILLABLE";

@@ -36,25 +36,24 @@ public class Employee {
 	public List<Address> addresses = new ArrayList<>();
 	
 	public Role role;
-	
-	/**
-	 * Nested comment: The 'setRoles' method is intentionally left empty because the 'role' property is already public,
-	 * so external code can directly assign a List of Role objects to the 'role' property without using this method.
-	 * It allows more direct access to the 'role' property, which can be useful in certain scenarios.
-	 * Note: It is generally recommended to use getter and setter methods for better encapsulation,
-	 * but in some cases, direct property access may be preferred.
-	 *
-	 * Alternative options for this method:
-	 * 1. Throw an UnsupportedOperationException to indicate that this method is not supported.
-	 * 2. Complete the implementation of the method if additional logic is needed when setting the 'role' property.
-	 */
 
 	public void setRoles(List<Role> role) {
 	
+		/**
+		 * Nested comment: The 'setRoles' method is intentionally left empty because the 'role' property is already public,
+		 * so external code can directly assign a List of Role objects to the 'role' property without using this method.
+		 * It allows more direct access to the 'role' property, which can be useful in certain scenarios.
+		 * Note: It is generally recommended to use getter and setter methods for better encapsulation,
+		 * but in some cases, direct property access may be preferred.
+		 *
+		 * Alternative options for this method:
+		 * 1. Throw an UnsupportedOperationException to indicate that this method is not supported.
+		 * 2. Complete the implementation of the method if additional logic is needed when setting the 'role' property.
+		 */
 		
 	}
 	
-	public Role getRoles(Role role) {
+	public Role getRoles() {
 		return this.role;
 	}
 	

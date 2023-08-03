@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.Data;
 
+@SuppressWarnings("serial")
 @Data
 public class DetailsNotFoundException extends RuntimeException {
 

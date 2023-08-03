@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-import com.isteer.springbootjdbc.MessageProperties;
+import com.isteer.springbootjdbc.MessageService;
 import com.isteer.springbootjdbc.exception.DetailsNotFoundException;
 import com.isteer.springbootjdbc.exception.SqlSyntaxException;
 import com.isteer.springbootjdbc.model.Employee;
@@ -28,10 +28,16 @@ import com.isteer.springbootjdbc.statuscode.StatusCodes;
 @Repository
 public class RoleDaoImpl implements RoleDao {
 	
+	private static String wLog = "Id: {} Status Code: {} Message: {} Exception: {} Layer: Role DAO Class";
+	
+	private static String iLog = "Id: {} Status Code: {} Message: {} Layer: Role DAO Class";
+	
+	private static long roleId;
+	
 	@Autowired
-	private MessageProperties messageproperties;
+	private MessageService messageservice;
 
-	private static final Logger logger = LogManager.getLogger(RoleDaoImpl.class);
+	private static final Logger auditlogger = LogManager.getLogger(RoleDaoImpl.class);
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -42,7 +48,7 @@ public class RoleDaoImpl implements RoleDao {
 
 			GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
-			if (jdbcTemplate.update(con -> {
+			int count=jdbcTemplate.update(con -> {
 				PreparedStatement ps = con.prepareStatement(SqlQueries.INSERT_ROLES_QUERY,
 						Statement.RETURN_GENERATED_KEYS);
 
@@ -55,24 +61,31 @@ public class RoleDaoImpl implements RoleDao {
 				ps.setString(7, roles.getHrManager());
 
 				return ps;
-			}, keyHolder) == 1) {
-				roles.setRoleId(keyHolder.getKey().longValue());
+			}, keyHolder);
+					
+			if(count == 1){
+				roleId=keyHolder.getKey().longValue();
+				roles.setRoleId(roleId);
+				
 			}
 		}
 			catch(NullPointerException nullexceptions) {
 				
 				List<String> exceptions = new ArrayList<>();
 				exceptions.add(nullexceptions.getMessage());
-				throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(), messageproperties.getConstraintsInvalidMessage(), exceptions);
+				auditlogger.warn(wLog, "New Role", StatusCodes.CONFLICT.getStatusCode(), messageservice.getConstraintsInvalidMessage(),exceptions);
+				throw new SqlSyntaxException(StatusCodes.CONFLICT.getStatusCode(), messageservice.getConstraintsInvalidMessage(), exceptions);
 			
 			
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),exceptions);
+			auditlogger.warn(wLog, "New Role", StatusCodes.BAD_REQUEST.getStatusCode(), messageservice.getBadSqlSyntaxErrorMessage(),exceptions);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageservice.getBadSqlSyntaxErrorMessage(),exceptions);
 		}
 
-		return new CustomRolePostResponse(StatusCodes.SUCCESS.getStatusCode(),messageproperties.getDetailsSavedMessage(), roles);
+		auditlogger.info(iLog, roleId, StatusCodes.SUCCESS.getStatusCode(),messageservice.getDetailsSavedMessage());
+		return new CustomRolePostResponse(StatusCodes.SUCCESS.getStatusCode(),messageservice.getDetailsSavedMessage(), roles);
 
 	}
 
@@ -102,9 +115,11 @@ public class RoleDaoImpl implements RoleDao {
 				} catch (DataAccessException exception) {
 					List<String> exceptions = new ArrayList<>();
 					exceptions.add(exception.getMessage());
-					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),
+					auditlogger.warn(wLog, "All Roles", StatusCodes.BAD_REQUEST.getStatusCode(), messageservice.getBadSqlSyntaxErrorMessage(),exceptions);
+					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageservice.getBadSqlSyntaxErrorMessage(),
 							exceptions);
 				}
+				auditlogger.info(iLog,"All Roles", StatusCodes.SUCCESS.getStatusCode(),messageservice.getDetailsDisplayedMessage());
 				return roles;
 			}
 
@@ -115,34 +130,33 @@ public class RoleDaoImpl implements RoleDao {
 	@Override
 	public Role getById(long roleId) {
 
-		return jdbcTemplate.query(SqlQueries.GET_ROLES_BY_ID_QUERY, new ResultSetExtractor<Role>() {
 
-			public Role extractData(ResultSet rs) throws SQLException {
-
-				Role role = new Role();
-				try {
-
-					while (rs.next()) {
-
-						role.setRoleId(rs.getLong("roleId"));
-						role.setRoles(rs.getString("role"));
-						role.setProject(rs.getString("project"));
-						role.setBillable(rs.getBoolean("billable"));
-						role.setHierarchicalLevel(rs.getString("hierarchicalLevel"));
-						role.setBuName(rs.getString("buName"));
-						role.setBuHead(rs.getString("buHead"));
-						role.setHrManager(rs.getString("hrManager"));
-
-					}
-					return role;
-				} catch (DataAccessException exception) {
-					List<String> exceptions = new ArrayList<>();
-					exceptions.add(exception.getMessage());
-					throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
-				}
-			}
-		});
+	    return jdbcTemplate.query(SqlQueries.GET_ROLES_BY_ID_QUERY, new ResultSetExtractor<Role>() {
+	        public Role extractData(ResultSet rs) throws SQLException {
+	            Role role = new Role();
+	            try {
+	                while (rs.next()) {
+	                    role.setRoleId(roleId);
+	                    role.setRoles(rs.getString("roles"));
+	                    role.setProject(rs.getString("project"));
+	                    role.setBillable(rs.getBoolean("billable"));
+	                    role.setHierarchicalLevel(rs.getString("hierarchicalLevel"));
+	                    role.setBuName(rs.getString("buName"));
+	                    role.setBuHead(rs.getString("buHead"));
+	                    role.setHrManager(rs.getString("hrManager"));
+	                }
+	                auditlogger.info(iLog, roleId, StatusCodes.SUCCESS.getStatusCode(), messageservice.getDetailsDisplayedMessage());
+	                return role;
+	            } catch (DataAccessException exception) {
+	                List<String> exceptions = new ArrayList<>();
+	                exceptions.add(exception.getMessage());
+	                auditlogger.warn(wLog, roleId, StatusCodes.BAD_REQUEST.getStatusCode(), messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
+	                throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
+	            }
+	        }
+	    }, new Object[] { roleId });
 	}
+
 
 	@Override
 	public CustomRolePostResponse update(Role roles, long roleId) {
@@ -172,19 +186,21 @@ public class RoleDaoImpl implements RoleDao {
 					}
 				}, roleId);
 
+				auditlogger.info(iLog, roleId, StatusCodes.SUCCESS.getStatusCode(),messageservice.getDetailsUpdatedMessage());
 				return new CustomRolePostResponse(StatusCodes.SUCCESS.getStatusCode(),
-						messageproperties.getDetailsSavedMessage(), role);
+						messageservice.getDetailsSavedMessage(), role);
 			} else {
 				List<String> exception = new ArrayList<>();
 				exception.add("Provide all details required");
-				throw new DetailsNotFoundException(StatusCodes.BAD_REQUEST.getStatusCode(),messageproperties.getNoContentToUpdateMessage(), exception);
+				auditlogger.warn(wLog, roleId, StatusCodes.BAD_REQUEST.getStatusCode(), messageservice.getNoContentToUpdateMessage(),exception);
+				throw new DetailsNotFoundException(StatusCodes.BAD_REQUEST.getStatusCode(),messageservice.getNoContentToUpdateMessage(), exception);
 			}
 
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),
-				messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+			auditlogger.warn(wLog, roleId , StatusCodes.BAD_REQUEST.getStatusCode(), messageservice.getBadSqlSyntaxErrorMessage(),exceptions);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(),messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 		}
 	}
 
@@ -195,36 +211,58 @@ public class RoleDaoImpl implements RoleDao {
 		try {
 			statement.add("Data in id " + roleId + " is deleted"); 
 			jdbcTemplate.update(SqlQueries.DELETE_ROLES_BY_ID_QUERY, roleId);
+			auditlogger.info(iLog, roleId, StatusCodes.SUCCESS.getStatusCode(),messageservice.getDetailsDeletedMessage());
 		} catch (DataAccessException exception) {
 			List<String> exceptions = new ArrayList<>();
 			exceptions.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(),
-					 exceptions);
+			auditlogger.warn(wLog, roleId, StatusCodes.BAD_REQUEST.getStatusCode(),messageservice.getBadSqlSyntaxErrorMessage(),exceptions);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageservice.getBadSqlSyntaxErrorMessage(), exceptions);
 		}
 
-		return new CustomDeleteResponse(StatusCodes.SUCCESS.getStatusCode(), messageproperties.getDetailsDeletedMessage(), statement);
+		return new CustomDeleteResponse(StatusCodes.SUCCESS.getStatusCode(), messageservice.getDetailsDeletedMessage(), statement);
 
 	}
 
 	public List<String> validateRoles(Role roles) {
 
-		List<String> exceptions = new ArrayList<>();
-
+		List<String> exception = new ArrayList<>();
 		try {
 
-			if (roles.getRoles().equals("")|| roles.getHierarchicalLevel().equals("") || roles.getProject().equals("")
-					|| !roles.isBillable() || roles.getBuHead().equals("") || roles.getBuName().equals("")
-					|| roles.getHrManager().equals("")) {
-				exceptions.add("no fields should be empty");
-				logger.error("no fields should be empty");
+			if (roles.getRoles() == null) {
+				exception.add("Role is required for Role details");
 			}
-		} catch (DataAccessException exception) {
+
+			if (roles.getProject().equals("")) {
+				exception.add("Project details is required for Role details");
+			}
+
+			if (!roles.isBillable()) {
+				exception.add("Billable details is required for Role details");
+			}
+
+			if (roles.getHierarchicalLevel().equals("")) {
+				exception.add("hierachical level details is required for Role details");
+			}
+
+			if (roles.getBuName().equals("")) {
+				exception.add("Business unit details is required for Role details");
+			}
+
+			if (roles.getBuHead().equals("")) {
+				exception.add("Business unit head details is required for Role details");
+			}
+
+			if (roles.getHrManager().equals("")) {
+				exception.add("Hr_Manager details is required for Role details");
+			}
+		} catch (DataAccessException exceptions) {
 			List<String> list = new ArrayList<>();
-			list.add(exception.getMessage());
-			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageproperties.getBadSqlSyntaxErrorMessage(), exceptions);
+			list.add(exceptions.getMessage());
+			auditlogger.warn(wLog, roleId, StatusCodes.BAD_REQUEST.getStatusCode(),messageservice.getBadSqlSyntaxErrorMessage(), list);
+			throw new SqlSyntaxException(StatusCodes.BAD_REQUEST.getStatusCode(), messageservice.getBadSqlSyntaxErrorMessage(), list);
 		}
 
-		return exceptions;
+		return exception;
 	}
 
 
